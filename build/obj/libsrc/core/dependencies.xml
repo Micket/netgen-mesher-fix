@@ -1,0 +1,855 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dependencies>
+   <includePath signature="/Ilibsrc /Ilibsrc/include">
+      <source file="../../../../libsrc/general/autodiff.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/ruler2.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/stlgeom/stltool.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/stlgeom/stlgeom.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/boundarylayer.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/validate.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/hpref_tet.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/include/csg.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/meshing3.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/refine.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/linalg/polynomial.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/linalg/linalg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/include/opti.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/linalg/opti.hpp"/>
+      </source>
+      <source file="../../../../libsrc/stlgeom/stlgeom.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/stlgeom/stlgeom.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/profiler.hpp" lastModified="122089d1c70">
+         <sysinclude file="../../../../../../../../usr/include/stdio.h"/>
+      </source>
+      <source file="../../../../libsrc/csg/polyhedra.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/csgparser.hpp" lastModified="121d4bac330">
+      </source>
+      <source file="../../../../libsrc/csg/curve2d.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/parser2.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/findip2.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/specpoin.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/dynamicmem.hpp" lastModified="122085a1060">
+         <include file="../../../../libsrc/general/externals.hpp"/>
+         <sysinclude file="../../../../../../../../usr/include/string.h"/>
+      </source>
+      <source file="../../../../libsrc/general/flags.cpp" lastModified="122087d6b28">
+         <include file="../../../../libsrc/general/flags.hpp"/>
+         <sysinclude file="../../../../../../../../usr/include/stdlib.h"/>
+      </source>
+      <source file="../../../../libsrc/csg/brick.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/general/hashtabl.hpp" lastModified="12208954888">
+         <include file="../../../../libsrc/general/externals.hpp"/>
+         <include file="../../../../libsrc/general/ngexception.hpp"/>
+         <include file="../../../../libsrc/general/tuples.hpp"/>
+         <include file="../../../../libsrc/general/table.hpp"/>
+      </source>
+      <source file="../../../../libsrc/gprim/geomops.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/linalg/vector.cpp" lastModified="121d0f4ba80">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/linalg/linalg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/array.hpp" lastModified="12208647870">
+         <include file="../../../../libsrc/general/moveablemem.hpp"/>
+         <sysinclude file="../../../../../../../../usr/include/string.h"/>
+      </source>
+      <source file="../../../../libsrc/meshing/localh.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/bspline2d.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/include/gprim.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/gprim/gprim.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/adfront2.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/bisect.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/linalg/densemat.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/linalg/linalg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/improve3.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/solid.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/hpref_hex.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/linalg/bfgs.cpp" lastModified="121d0ff3618">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/linalg/linalg.hpp"/>
+         <include file="../../../../libsrc/linalg/opti.hpp"/>
+      </source>
+      <source file="../../../../libsrc/include/geometry2d.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/geom2d/geometry2d.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/extrusion.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/meshsurf.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/singularref.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/curvedelems.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/general/autodiff.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/spbita2d.hpp" lastModified="122089db8b0">
+         <include file="../../../../libsrc/general/platform.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/clusters.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/meshfunc.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/gprim/geom3d.cpp" lastModified="121d0f4ba80">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/gprim/gprim.hpp"/>
+      </source>
+      <source file="../../../../libsrc/visualization/mvdraw.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/visualization/vispar.hpp"/>
+      </source>
+      <source file="../../../../libsrc/gprim/transform3d.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/triapprox.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/identify.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/stlgeom/stlgeommesh.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/stlgeom/stlgeom.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/hpref_segm.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/general/bitarray.hpp" lastModified="1220866ca30">
+         <include file="../../../../libsrc/general/platform.hpp"/>
+         <include file="../../../../libsrc/general/array.hpp"/>
+         <sysinclude file="../../../../../../../../usr/include/limits.h"/>
+      </source>
+      <source file="../../../../libsrc/meshing/ruler3.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/meshtool.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/global.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/gprim/gprim.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/gprim/geomobjects.hpp"/>
+         <include file="../../../../libsrc/gprim/geomops.hpp"/>
+         <include file="../../../../libsrc/gprim/geomfuncs.hpp"/>
+         <include file="../../../../libsrc/gprim/geom2d.hpp"/>
+         <include file="../../../../libsrc/gprim/geom3d.hpp"/>
+         <include file="../../../../libsrc/gprim/geomtest3d.hpp"/>
+         <include file="../../../../libsrc/gprim/transform3d.hpp"/>
+         <include file="../../../../libsrc/gprim/adtree.hpp"/>
+      </source>
+      <source file="../../../../libsrc/include/visual.hpp" lastModified="121d4f328b0">
+         <include file="../../../../libsrc/visualization/visual.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/spline3d.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/hpref_quad.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/meshtype.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/gprim/adtree.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/gprim/gprim.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/topology.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/visualization/soldata.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/adfront3.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/geom2d/splinegeometry.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/csg/csgparser.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/parthreads.hpp" lastModified="122084b00e8">
+         <sysinclude file="../../../../../../../../usr/include/pthread.h"/>
+      </source>
+      <source file="../../../../libsrc/meshing/meshing2.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/meshclass.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/delaunay.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/secondorder.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/explicitcurve2d.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/csgeom.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/stlgeom/meshstlsurface.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/revolution.hpp" lastModified="121d4bb53b8">
+      </source>
+      <source file="../../../../libsrc/visualization/vssolution.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/prism2rls.cpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/specials.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/pyramidrls.cpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/visualization/meshdoc.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/manifold.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/general/template.hpp" lastModified="12208603e68">
+      </source>
+      <source file="../../../../libsrc/gprim/geomfuncs.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/visualization/visual.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/incvis.hpp"/>
+         <include file="../../../../libsrc/visualization/mvdraw.hpp"/>
+         <include file="../../../../libsrc/visualization/soldata.hpp"/>
+         <include file="../../../../libsrc/visualization/vssolution.hpp"/>
+         <include file="../../../../libsrc/visualization/meshdoc.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/optmem.hpp" lastModified="1220861f7d0">
+         <include file="../../../../libsrc/general/array.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/hprefinement.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/geomsearch.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/gprim/geom2d.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/general/mpi_interface.hpp" lastModified="121d0f4ba80">
+      </source>
+      <source file="../../../../libsrc/geom2d/spline.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/csg.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/geom2d/spline.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/improve2.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/gprim/geomtest3d.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/gprim/gprim.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/surface.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/paralleltop.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/edgeflw.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/include/linalg.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/linalg/linalg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/linalg/opti.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/stlgeom/stlline.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/stlgeom/stlgeom.hpp"/>
+      </source>
+      <source file="../../../../libsrc/stlgeom/stltool.hpp" lastModified="121d54e1dd8">
+      </source>
+      <source file="../../../../libsrc/meshing/tetrarls.cpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/general/seti.hpp" lastModified="12208698d38">
+         <include file="../../../../libsrc/general/array.hpp"/>
+         <include file="../../../../libsrc/general/bitarray.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/hpref_trig.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/stlgeom/stlgeomchart.cpp" lastModified="121d563b918">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/stlgeom/stlgeom.hpp"/>
+      </source>
+      <source file="../../../../libsrc/linalg/polynomial.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/msghandler.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/stlgeom/stltopology.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/stlgeom/stlgeom.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/triarls.cpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/algprim.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/stlgeom/stlgeom.hpp" lastModified="121d54dcbd0">
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/stlgeom/stltopology.hpp"/>
+         <include file="../../../../libsrc/stlgeom/stltool.hpp"/>
+         <include file="../../../../libsrc/stlgeom/stlline.hpp"/>
+         <include file="../../../../libsrc/stlgeom/meshstlsurface.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/netrule3.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/polyhedra.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/geom2d/geom2dmesh.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/csg.hpp"/>
+         <include file="../../../../libsrc/geom2d/geometry2d.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/table.cpp" lastModified="122087e9fc0">
+         <include file="../../../../libsrc/general/table.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/ruler2.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/include/meshing.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/specpoin.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/boundarylayer.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/flags.hpp" lastModified="12208754d08">
+         <include file="../../../../libsrc/general/symbolta.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/validate.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/linalg/vector.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/general/mystring.hpp" lastModified="1220856bcd0">
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <sysinclude file="../../../../../../../../usr/include/string.h"/>
+         <sysinclude file="../../../../../../../../usr/include/stdlib.h"/>
+      </source>
+      <source file="../../../../libsrc/linalg/linopt.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/linalg/linalg.hpp"/>
+         <include file="../../../../libsrc/linalg/opti.hpp"/>
+      </source>
+      <source file="../../../../libsrc/include/stlgeom.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/stlgeom/stlgeom.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/hpref_prism.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/meshing3.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/csg.hpp" lastModified="121d51450f8">
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/include/geometry2d.hpp"/>
+         <include file="../../../../libsrc/csg/surface.hpp"/>
+         <include file="../../../../libsrc/csg/solid.hpp"/>
+         <include file="../../../../libsrc/csg/identify.hpp"/>
+         <include file="../../../../libsrc/csg/singularref.hpp"/>
+         <include file="../../../../libsrc/csg/csgeom.hpp"/>
+         <include file="../../../../libsrc/csg/csgparser.hpp"/>
+         <include file="../../../../libsrc/csg/triapprox.hpp"/>
+         <include file="../../../../libsrc/csg/algprim.hpp"/>
+         <include file="../../../../libsrc/csg/brick.hpp"/>
+         <include file="../../../../libsrc/csg/spline3d.hpp"/>
+         <include file="../../../../libsrc/csg/manifold.hpp"/>
+         <include file="../../../../libsrc/csg/curve2d.hpp"/>
+         <include file="../../../../libsrc/csg/explicitcurve2d.hpp"/>
+         <include file="../../../../libsrc/csg/gencyl.hpp"/>
+         <include file="../../../../libsrc/csg/polyhedra.hpp"/>
+         <include file="../../../../libsrc/csg/extrusion.hpp"/>
+         <include file="../../../../libsrc/csg/revolution.hpp"/>
+         <include file="../../../../libsrc/csg/specpoin.hpp"/>
+         <include file="../../../../libsrc/csg/edgeflw.hpp"/>
+         <include file="../../../../libsrc/csg/meshsurf.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/gencyl.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/include/mystdlib.h" lastModified="121d57d2100">
+         <sysinclude file="../../../../../../../../usr/include/pthread.h"/>
+         <sysinclude file="../../../../../../../../usr/include/pthread.h"/>
+      </source>
+      <source file="../../../../libsrc/meshing/adfront2.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/general/ngexception.hpp" lastModified="12208483de0">
+      </source>
+      <source file="../../../../libsrc/general/platform.hpp" lastModified="12207d2b020">
+      </source>
+      <source file="../../../../libsrc/linalg/densemat.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/gprim/geomobjects.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/general/profiler.cpp" lastModified="122089c1e88">
+         <include file="../../../../libsrc/general/profiler.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/extrusion.hpp" lastModified="121d4bb0980">
+      </source>
+      <source file="../../../../libsrc/csg/meshsurf.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/csgparser.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/curve2d.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/curvedelems.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/general/dynamicmem.cpp" lastModified="122085d7f48">
+         <include file="../../../../libsrc/general/dynamicmem.hpp"/>
+         <include file="../../../../libsrc/general/moveablemem.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/clusters.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/brick.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/moveablemem.hpp" lastModified="122084e1dc8">
+         <include file="../../../../libsrc/general/parthreads.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/meshing.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/include/opti.hpp"/>
+         <include file="../../../../libsrc/meshing/msghandler.hpp"/>
+         <include file="../../../../libsrc/meshing/meshtype.hpp"/>
+         <include file="../../../../libsrc/meshing/localh.hpp"/>
+         <include file="../../../../libsrc/meshing/meshclass.hpp"/>
+         <include file="../../../../libsrc/meshing/global.hpp"/>
+         <include file="../../../../libsrc/meshing/meshtool.hpp"/>
+         <include file="../../../../libsrc/meshing/ruler2.hpp"/>
+         <include file="../../../../libsrc/meshing/adfront2.hpp"/>
+         <include file="../../../../libsrc/meshing/meshing2.hpp"/>
+         <include file="../../../../libsrc/meshing/improve2.hpp"/>
+         <include file="../../../../libsrc/meshing/geomsearch.hpp"/>
+         <include file="../../../../libsrc/meshing/adfront3.hpp"/>
+         <include file="../../../../libsrc/meshing/ruler3.hpp"/>
+         <include file="../../../../libsrc/meshing/meshing3.hpp"/>
+         <include file="../../../../libsrc/meshing/improve3.hpp"/>
+         <include file="../../../../libsrc/meshing/findip.hpp"/>
+         <include file="../../../../libsrc/meshing/findip2.hpp"/>
+         <include file="../../../../libsrc/meshing/topology.hpp"/>
+         <include file="../../../../libsrc/meshing/curvedelems.hpp"/>
+         <include file="../../../../libsrc/meshing/clusters.hpp"/>
+         <include file="../../../../libsrc/meshing/meshfunc.hpp"/>
+         <include file="../../../../libsrc/meshing/bisect.hpp"/>
+         <include file="../../../../libsrc/meshing/hprefinement.hpp"/>
+         <include file="../../../../libsrc/meshing/boundarylayer.hpp"/>
+         <include file="../../../../libsrc/meshing/specials.hpp"/>
+         <include file="../../../../libsrc/meshing/validate.hpp"/>
+         <include file="../../../../libsrc/meshing/paralleltop.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/sort.hpp" lastModified="12208681e08">
+      </source>
+      <source file="../../../../libsrc/general/myadt.hpp" lastModified="12208a9e5e0">
+         <include file="../../../../libsrc/general/platform.hpp"/>
+         <include file="../../../../libsrc/general/externals.hpp"/>
+         <include file="../../../../libsrc/general/ngexception.hpp"/>
+         <include file="../../../../libsrc/general/parthreads.hpp"/>
+         <include file="../../../../libsrc/general/array.hpp"/>
+         <include file="../../../../libsrc/general/bitarray.hpp"/>
+         <include file="../../../../libsrc/general/moveablemem.hpp"/>
+         <include file="../../../../libsrc/general/dynamicmem.hpp"/>
+         <include file="../../../../libsrc/general/optmem.hpp"/>
+         <include file="../../../../libsrc/general/tuples.hpp"/>
+         <include file="../../../../libsrc/general/template.hpp"/>
+         <include file="../../../../libsrc/general/sort.hpp"/>
+         <include file="../../../../libsrc/general/seti.hpp"/>
+         <include file="../../../../libsrc/general/flags.hpp"/>
+         <include file="../../../../libsrc/general/table.hpp"/>
+         <include file="../../../../libsrc/general/hashtabl.hpp"/>
+         <include file="../../../../libsrc/general/symbolta.hpp"/>
+         <include file="../../../../libsrc/general/autoptr.hpp"/>
+         <include file="../../../../libsrc/general/profiler.hpp"/>
+         <include file="../../../../libsrc/general/spbita2d.hpp"/>
+         <include file="../../../../libsrc/general/mystring.hpp"/>
+         <include file="../../../../libsrc/general/mpi_interface.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/localh.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/gprim/geom3d.hpp" lastModified="121e9a2a538">
+      </source>
+      <source file="../../../../libsrc/meshing/smoothing3.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/include/csg.hpp"/>
+         <include file="../../../../libsrc/include/opti.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/bisect.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/triapprox.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/identify.hpp" lastModified="121d4bb20f0">
+      </source>
+      <source file="../../../../libsrc/meshing/improve3.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/include/csg.hpp"/>
+         <include file="../../../../libsrc/include/opti.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/solid.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/tuples.hpp" lastModified="122088b3668">
+         <include file="../../../../libsrc/general/platform.hpp"/>
+         <include file="../../../../libsrc/general/template.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/pyramid2rls.cpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/ruler3.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/singularref.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/include/mydefs.hpp" lastModified="121d5754548">
+      </source>
+      <source file="../../../../libsrc/csg/spline3d.hpp" lastModified="121d4bbd888">
+      </source>
+      <source file="../../../../libsrc/linalg/linsearch.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/linalg/linalg.hpp"/>
+         <include file="../../../../libsrc/linalg/opti.hpp"/>
+      </source>
+      <source file="../../../../libsrc/gprim/adtree.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/topology.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/general/symbolta.hpp" lastModified="122087408d0">
+         <include file="../../../../libsrc/general/platform.hpp"/>
+         <include file="../../../../libsrc/general/array.hpp"/>
+      </source>
+      <source file="../../../../libsrc/geom2d/geometry2d.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/geom2d/spline.hpp"/>
+         <include file="../../../../libsrc/geom2d/splinegeometry.hpp"/>
+         <include file="../../../../libsrc/geom2d/geom2dmesh.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/findip.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/meshfunc.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/gprim/transform3d.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/gprim/gprim.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/parallelmesh.cpp" lastModified="121d0f4be68">
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/meshing/paralleltop.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/meshclass.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/explicitcurve2d.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/csgeom.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/netrule2.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/parser3.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/visualization/vispar.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/meshtool.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/include/csg.hpp"/>
+         <include file="../../../../libsrc/include/geometry2d.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/global.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/specials.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/meshfunc2d.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/meshtype.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/externals.hpp" lastModified="122085f57f0">
+      </source>
+      <source file="../../../../libsrc/general/autoptr.hpp" lastModified="12208504490">
+      </source>
+      <source file="../../../../libsrc/meshing/adfront3.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/geomsearch.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/geom2d/splinegeometry.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/csg.hpp"/>
+         <include file="../../../../libsrc/geom2d/geometry2d.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/meshing2.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/include/visual.hpp"/>
+         <include file="../../../../libsrc/include/stlgeom.hpp"/>
+      </source>
+      <source file="../../../../libsrc/geom2d/spline.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/gprim/geomtest3d.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/surface.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/classifyhpel.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/stlgeom/meshstlsurface.cpp" lastModified="121d5635388">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/include/gprim.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/stlgeom/stlgeom.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/revolution.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/smoothing2.5.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/include/opti.hpp"/>
+      </source>
+      <source file="../../../../libsrc/stlgeom/stlline.hpp" lastModified="121d54dfe98">
+      </source>
+      <source file="../../../../libsrc/meshing/zrefine.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/include/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/quadrls.cpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/csg/manifold.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/include/myadt.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/general/myadt.hpp"/>
+      </source>
+      <source file="../../../../libsrc/gprim/geomfuncs.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/gprim/gprim.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/genmesh.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/include/linalg.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/hprefinement.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/meshing/hprefinement.hpp"/>
+         <include file="../../../../libsrc/meshing/hpref_segm.hpp"/>
+         <include file="../../../../libsrc/meshing/hpref_trig.hpp"/>
+         <include file="../../../../libsrc/meshing/hpref_quad.hpp"/>
+         <include file="../../../../libsrc/meshing/hpref_tet.hpp"/>
+         <include file="../../../../libsrc/meshing/hpref_prism.hpp"/>
+         <include file="../../../../libsrc/meshing/hpref_hex.hpp"/>
+         <include file="../../../../libsrc/meshing/hpref_pyramid.hpp"/>
+         <include file="../../../../libsrc/meshing/classifyhpel.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/improve2gen.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/include/opti.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/smoothing2.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/include/opti.hpp"/>
+      </source>
+      <source file="../../../../libsrc/gprim/geom2d.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/gprim/gprim.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/msghandler.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/stlgeom/stltopology.hpp" lastModified="121d54e5870">
+      </source>
+      <source file="../../../../libsrc/geom2d/genmesh2d.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/csg.hpp"/>
+         <include file="../../../../libsrc/geom2d/geometry2d.hpp"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/algprim.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/hpref_pyramid.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/meshing/improve2.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/include/opti.hpp"/>
+      </source>
+      <source file="../../../../libsrc/meshing/paralleltop.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/meshing/meshing.hpp"/>
+         <include file="../../../../libsrc/meshing/paralleltop.hpp"/>
+      </source>
+      <source file="../../../../libsrc/csg/edgeflw.cpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/mystdlib.h"/>
+         <include file="../../../../libsrc/include/meshing.hpp"/>
+         <include file="../../../../libsrc/csg/csg.hpp"/>
+      </source>
+      <source file="../../../../libsrc/geom2d/geom2dmesh.hpp" lastModified="121d0f4b698">
+      </source>
+      <source file="../../../../libsrc/linalg/linalg.hpp" lastModified="121d0f4b698">
+         <include file="../../../../libsrc/include/myadt.hpp"/>
+         <include file="../../../../libsrc/linalg/vector.hpp"/>
+         <include file="../../../../libsrc/linalg/densemat.hpp"/>
+         <include file="../../../../libsrc/linalg/polynomial.hpp"/>
+      </source>
+      <source file="../../../../libsrc/general/table.hpp" lastModified="122087fa960">
+         <include file="../../../../libsrc/general/array.hpp"/>
+      </source>
+   </includePath>
+</dependencies>

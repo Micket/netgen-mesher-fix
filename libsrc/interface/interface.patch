@@ -1,0 +1,5604 @@
+Index: writeuser.hpp
+===================================================================
+--- writeuser.hpp	(revision 159)
++++ writeuser.hpp	(working copy)
+@@ -1,149 +0,0 @@
+-#ifndef WRITEUSER
+-#define WRITEUSER
+-
+-/**************************************************************************/
+-/* File:    writeuser.hh                                                  */
+-/* Authors: many                                                          */
+-/* Date:    10. Dec. 97                                                   */
+-/**************************************************************************/
+-
+-
+-extern
+-void WriteFile (int typ,
+-		const Mesh & mesh,
+-		const CSGeometry & geom,
+-		const char * filename,
+-		const char * geomfile = NULL,
+-		double h = 0);
+-
+-
+-
+-extern
+-void ReadFile (Mesh & mesh,
+-	       const string & filename);
+-
+-
+-
+-
+-
+-
+-extern
+-void WriteNeutralFormat (const Mesh & mesh,
+-			 const CSGeometry & geom,
+-			 const string & filename);
+-
+-extern
+-void WriteSurfaceFormat (const Mesh & mesh,
+-			 const string & filename);
+-
+-extern
+-void WriteSTLFormat (const Mesh & mesh,
+-		     const string & filename);
+-
+-extern
+-void WriteVRMLFormat (const Mesh & mesh,
+-		      bool faces,
+-		      const string & filename);
+-
+-extern
+-void WriteFEPPFormat (const Mesh & mesh,
+-		      const CSGeometry & geom,
+-		      const string & filename);
+-
+-extern
+-void WriteGmshFormat (const Mesh & mesh,
+-                         const CSGeometry & geom,
+-                         const string & filename);
+-
+-
+-// Philippose - 29/01/2009
+-// Added GMSH v2.xx Mesh Export support
+-void WriteGmsh2Format (const Mesh & mesh,
+-			           const CSGeometry & geom,
+-			           const string & filename);
+-
+-
+-extern
+-void WriteUserChemnitz (const Mesh & mesh,
+-			const string & filename);
+-
+-extern
+-void WriteJCMFormat (const Mesh & mesh,
+-                     const CSGeometry & geom,
+-                     const string & filename);
+-
+-
+-extern
+-void WriteDiffPackFormat (const Mesh & mesh,
+-			  const CSGeometry & geom,
+-			  const string & filename);
+-
+-extern
+-void WriteTochnogFormat (const Mesh & mesh,
+-			 const string & filename);
+-
+-extern
+-void WriteTecPlotFormat (const Mesh & mesh,
+-			 const CSGeometry & geom,
+-			 const string & filename);
+-
+-extern
+-void WriteAbaqusFormat (const Mesh & mesh,
+-			const string & filename);
+-
+-extern
+-void WriteFluentFormat (const Mesh & mesh,
+-			const string & filename);
+-
+-extern
+-void WritePermasFormat (const Mesh & mesh,
+-			const string & filename);
+-
+-extern
+-void WriteFEAPFormat (const Mesh & mesh,
+-		      const string & filename);
+-
+-extern
+-void WriteElmerFormat (const Mesh & mesh,
+-		       const string & filename);
+-
+-
+-extern
+-void WriteEdgeElementFormat (const Mesh & mesh,
+-			     const CSGeometry & geom,
+-			     const string & filename);
+-
+-
+-
+-#ifdef OLIVER
+-extern
+-void WriteTETFormat (const Mesh & mesh,
+-		     const string & filename);
+-
+-#endif
+-
+-extern void ReadTETFormat (Mesh & mesh,
+-                      const string & filename);
+-
+-
+-extern void ReadFNFFormat (Mesh & mesh,
+-                           const string & filename);
+-
+-
+-
+-void WriteDolfinFormat (const Mesh & mesh,
+-			const string & filename);
+-
+-
+-extern void RegisterUserFormats (Array<const char*> & names);
+-
+-extern bool WriteUserFormat (const string & format,
+-			     const Mesh & mesh,
+-			     const CSGeometry & geom,
+-			     const string & filename);
+-
+-
+-
+-
+-#endif
+-
+Index: writepermas.cpp
+===================================================================
+--- writepermas.cpp	(revision 159)
++++ writepermas.cpp	(working copy)
+@@ -3,33 +3,18 @@
+ // for Intes GmbH, Stuttgart
+ //
+ 
+-#include <mystdlib.h>
+-
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+ #include <string>
++#include <fstream>
++#include "meshing.hpp"
+ 
+ using namespace std;
+ 
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+     // Forward declarations (don't know, where to define them, sorry)
+     int addComponent(string &strComp, string &strSitu, ofstream &out);
+ 
+ 
+-    // This should be the new function to export a PERMAS file
+-    void WritePermasFormat (const Mesh &mesh, const string &filename, 
+-                            string &strComp, string &strSitu) 
+-    {
+-        ofstream outfile (filename.c_str());
+-        addComponent(strComp, strSitu, outfile);
+-        WritePermasFormat ( mesh, filename);
+-    }
+-
+     void WritePermasFormat (const Mesh &mesh, const string &filename)
+     {
+         string strComp, strSitu;
+@@ -179,6 +164,16 @@
+             outfile << mesh.Point(i)(2) << "\n";
+         }
+     }
++
++    // This should be the new function to export a PERMAS file
++    void WritePermasFormat (const Mesh &mesh, const string &filename, 
++                            string &strComp, string &strSitu) 
++    {
++        ofstream outfile (filename.c_str());
++        addComponent(strComp, strSitu, outfile);
++        WritePermasFormat ( mesh, filename);
++    }
++
+     ////////////////////////////////////////////////////////////////////////////////// 
+     // \brief Writes PERMAS configuration header into export file
+     //        Returns >0 in case of errors
+Index: readfnf.cpp
+===================================================================
+--- readfnf.cpp	(revision 158)
++++ readfnf.cpp	(working copy)
+@@ -1,20 +1,11 @@
+-
+ //
+ //  Read Pro/ENGINEER neutral format
+ //
+ 
+-#include <mystdlib.h>
++#include "meshing.hpp"
+ 
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-#include <sys/stat.h>
+-
+-
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+ 
+   bool ReadLine (istream & in, string & buf)
+   {
+Index: readtetmesh.cpp
+===================================================================
+--- readtetmesh.cpp	(revision 159)
++++ readtetmesh.cpp	(working copy)
+@@ -1,797 +0,0 @@
+-
+-//
+-//  Read CST file format
+-//
+-
+-#include <mystdlib.h>
+-
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-#include <sys/stat.h>
+-
+-
+-namespace netgen
+-{
+-#include "writeuser.hpp"
+-
+-
+-
+-
+-  void ReadTETFormat (Mesh & mesh, 
+-                      const string & hfilename)
+-  {
+-    const char * filename = hfilename.c_str();
+-
+-    cout << "Reading .tet mesh" << endl;
+-
+-    ifstream in (filename);
+-
+-    int inputsection = 0;
+-    bool done = false;
+-
+-    char ch;
+-    string str;
+-
+-    string version;
+-
+-    int unitcode;
+-    double tolerance;
+-    double dS1, dS2, alphaDeg, x3D, y3D, z3D;
+-    int nelts,nfaces,nedges,nnodes;
+-    int nperiodicmasternodes,ncornerperiodicmasternodes,ncubicperiodicmasternodes;
+-    int nperiodicmasteredges,ncornerperiodicmasteredges;
+-    int nperiodicmasterfaces;
+-    int nodeid,type,pid;
+-    int dummyint;
+-    int modelverts,modeledges,modelfaces,modelcells;
+-    Point3d p;
+-    int numObj3D,numObj2D,numObj1D,numObj0D;
+-    bool nullstarted;
+-    Array<int> eldom;
+-    int minId3D = -1, minId2D = -1;
+-    int maxId3D(-1), maxId2D(-1), maxId1D(-1), maxId0D(-1);
+-    Array<Array<int> *> segmentdata;
+-    Array<Element2d* > tris;
+-
+-    Array<int> userdata_int;  // just save data for 1:1 output
+-    Array<double> userdata_double;
+-    Array<int> point_pids;
+-    Array<int> tetfacedata;
+-    Array<int> uid_to_group_3D, uid_to_group_2D, uid_to_group_1D, uid_to_group_0D;
+-
+-    while(!done)
+-      {
+-        // skip "//" comment
+-        bool comment = true;
+-        while(comment)
+-          {
+-            ch = in.get();
+-            while(ch == ' ' || ch == '\n' || ch == '\t' || ch =='\r')
+-              ch = in.get();
+-	      
+-            if(ch != '/')
+-              {
+-                comment = false;
+-                in.putback(ch);
+-              }
+-            else
+-              {
+-                ch = in.get();
+-                if(ch != '/')
+-                  {
+-                    comment = false;
+-                    in.putback(ch);
+-                    in.putback('/');
+-                  }
+-                else
+-                  {
+-                    in.ignore(10000,'\n');
+-                  }
+-              }
+-          }
+-
+-	  
+-        switch(inputsection)
+-          {
+-          case 0:
+-            // version number
+-            in >> version;
+-            cout << "Version number " << version << endl;
+-            if(version != "1.1" && version != "2" && version != "2.0")
+-              {
+-                cerr << "WARNING: import only tested for versions 1.1 and 2" << endl;
+-                //done = true;
+-              }
+-            userdata_double.Append(atof(version.c_str()));
+-            break;
+-
+-          case 1:
+-            // unit code (1=CM 2=MM 3=M 4=MIC 5=NM 6=FT 7=IN 8=MIL)
+-            in >> unitcode;
+-            cout << "unit code " << unitcode << endl;
+-            userdata_int.Append(unitcode);
+-            break;
+-
+-          case 2:
+-            // Geometric coord "zero" tolerance threshold
+-            in >> tolerance;
+-            cout << "tolerance " << tolerance << endl;
+-            userdata_double.Append(tolerance);
+-            break;
+-
+-          case 3:
+-            // Periodic UnitCell dS1 , dS2 , alphaDeg
+-            in >> dS1 >> dS2 >> alphaDeg;
+-            userdata_double.Append(dS1);
+-            userdata_double.Append(dS2);
+-            userdata_double.Append(alphaDeg);
+-            break;
+-
+-          case 4:
+-            // Periodic UnitCell origin in global coords (x3D,y3D,z3D)
+-            in >> x3D >> y3D >> z3D;
+-            userdata_double.Append(x3D);
+-            userdata_double.Append(y3D);
+-            userdata_double.Append(z3D);
+-            break;
+-
+-          case 5:
+-            // Model entity count: Vertices, Edges, Faces, Cells (Version 2)
+-            in >> modelverts >> modeledges >> modelfaces >> modelcells;
+-            userdata_int.Append(modelverts);
+-            userdata_int.Append(modeledges);
+-            userdata_int.Append(modelfaces);
+-            userdata_int.Append(modelcells);
+-            break;
+-
+-          case 6:
+-            // Topological mesh-entity counts (#elements,#faces,#edges,#nodes)
+-            in >> nelts >> nfaces >> nedges >> nnodes;
+-            cout << nelts << " elements, " << nfaces << " faces, " << nedges << " edges, " << nnodes << " nodes" << endl;
+-            mesh.SetAllocSize(nnodes,2*nedges,nfaces,nelts);
+-            break;
+-
+-          case 7:
+-            // NodeID, X, Y, Z, Type (0=Reg 1=PMaster 2=PSlave 3=CPMaster 4=CPSlave), PID:
+-            {
+-              cout << "read nodes" << endl;
+-              for(int i=0; i<nnodes; i++)
+-                {
+-                  in >> nodeid >> p.X() >> p.Y() >> p.Z() >> type >> pid;
+-                  mesh.AddPoint(p);		  
+-                  point_pids.Append(pid);
+-                  if(pid > maxId0D)
+-                    maxId0D = pid;
+-                  //(*testout) << "point " << p << " type " << type << " mastersexist " << mastersexist << endl;
+-                }
+-            }
+-            break;
+-
+-          case 8:
+-            // Number of Periodic Master Nodes
+-            in >> nperiodicmasternodes;
+-            break;
+-
+-          case 9:
+-            // MasterNodeID, SlaveNodeID, TranslCode (1=dS1 2=dS2 3=dS1+dS2)
+-            for(int i=0; i<nperiodicmasternodes; i++)
+-              {
+-                for(int j=0; j<2; j++)
+-                  in >> dummyint;
+-
+-                in >> dummyint;
+-              }
+-            break;
+-
+-          case 10:
+-            // Number of Corner Periodic Master Nodes
+-            in >> ncornerperiodicmasternodes;
+-            break;
+-
+-          case 11:
+-            // MasterNodeID, 3-SlaveNodeID's, 3-TranslCodes (1=dS1 2=dS2 3=dS1+dS2)
+-            for(int i=0; i<ncornerperiodicmasternodes; i++)
+-              {
+-                for(int j=0; j<4; j++)
+-                  in >> dummyint;
+-
+-                for(int j=0; j<3; j++)
+-                  in >> dummyint;
+-              }
+-            break;
+-
+-          case 12:
+-            // Number of Cubic Periodic Master Nodes
+-            in >> ncubicperiodicmasternodes;
+-            break;
+-
+-          case 13:
+-            //MasterNodeID, 7-SlaveNodeID's, TranslCodes
+-            for(int i=0; i<ncubicperiodicmasternodes; i++)
+-              {
+-                for(int j=0; j<8; j++)
+-                  in >> dummyint;
+-
+-                for(int j=0; j<7; j++)
+-                  in >> dummyint;
+-              }
+-            break;
+-
+-          case 14:
+-            // EdgeID, NodeID0, NodeID1, Type (0=Reg 1=PMaster 2=PSlave 3=CPMaster 4=CPSlave), PID
+-            cout << "read edges" << endl;
+-            nullstarted = false;
+-            segmentdata.SetSize(nedges);
+-            for(int i=0; i<nedges; i++)
+-              {
+-                segmentdata[i] = new Array<int>(7);
+-                *segmentdata[i] = -1;
+-                in >> dummyint;
+-                in >> (*segmentdata[i])[0] >> (*segmentdata[i])[1];
+-                in >> type;
+-                in >> (*segmentdata[i])[2];
+-                if((*segmentdata[i])[2] > maxId1D)
+-                  maxId1D = (*segmentdata[i])[2];
+-              }
+-            break;
+-
+-          case 15:
+-            // Number of Periodic Master Edges
+-            in >> nperiodicmasteredges;
+-            break;
+-
+-          case 16:
+-            // MasterEdgeID, SlaveEdgeID, TranslCode (1=dS1 2=dS2 3=dS1+dS2)
+-            for(int i=0; i<nperiodicmasteredges; i++)
+-              in >> dummyint >> dummyint >> dummyint;
+-            break;
+-
+-          case 17:
+-            // Number of Corner Periodic Master Edges
+-            in >> ncornerperiodicmasteredges;
+-            break;
+-
+-          case 18:
+-            // MasterEdgeID, 3 SlaveEdgeID's, 3 TranslCode (1=dS1 2=dS2 3=dS1+dS2)
+-            for(int i=0; i<ncornerperiodicmasteredges; i++)
+-              {
+-                in >> dummyint;
+-                for(int j=0; j<3; j++)
+-                  in >> dummyint;
+-                for(int j=0; j<3; j++)
+-                  in >> dummyint;
+-              }
+-            break;
+-
+-          case 19:
+-            // FaceID, EdgeID0, EdgeID1, EdgeID2, FaceType (0=Reg 1=PMaster 2=PSlave), PID
+-            {
+-              //Segment seg;
+-              int segnum_ng[3];
+-              bool neg[3];
+-              cout << "read faces" << endl;
+-              nullstarted = false;
+-              for(int i=0; i<nfaces; i++)
+-                {
+-                  int trinum;
+-                  int segnum;
+-		    
+-                  tris.Append(new Element2d(TRIG));
+-
+-                  in >> trinum;
+-                  for(int j=0; j<3; j++)
+-                    {
+-                      in >> segnum;
+-                      neg[j] = (segnum<0);
+-                      if(!neg[j])
+-                        segnum_ng[j] = segnum-1;
+-                      else
+-                        segnum_ng[j] = -segnum-1;
+-			
+-                      if(neg[j])
+-                        tris.Last()->PNum(j+1) = (*segmentdata[segnum_ng[j]])[1];
+-                      else
+-                        tris.Last()->PNum(j+1) = (*segmentdata[segnum_ng[j]])[0];
+-
+-                      tris.Last()->GeomInfoPi(j+1).trignum = trinum;
+-                    }
+-                  in >> type;
+-                  int faceid;
+-                  in >> faceid;
+-		    
+-                  if(faceid > maxId2D)
+-                    maxId2D = faceid;
+-
+-                  if(i==0 || faceid < minId2D)
+-                    minId2D = faceid;
+-		    
+-                  tris.Last()->SetIndex(faceid);
+-
+-                  if(faceid > 0)
+-                    {
+-                      //if(nullstarted)
+-                      //  {
+-                      //    cout << "Faces: Assumption about index 0 wrong (face"<<trinum <<")" << endl;
+-                      //  }
+-                      //mesh.AddSurfaceElement(tri);
+-			
+-                      for(int j=0; j<3; j++)
+-                        {
+-                          if(neg[j])
+-                            {
+-                              (*segmentdata[segnum_ng[j]])[4] = faceid;
+-                              (*segmentdata[segnum_ng[j]])[6] = trinum;
+-                            }
+-                          else
+-                            {
+-                              (*segmentdata[segnum_ng[j]])[3] = faceid;
+-                              (*segmentdata[segnum_ng[j]])[5] = trinum;
+-                            }
+-                        }
+-                    }
+-                  else
+-                    nullstarted = true;
+-                }
+-            }
+-            break;
+-
+-          case 20:
+-            // Number of Periodic Master Faces
+-            in >> nperiodicmasterfaces;
+-            break;
+-
+-          case 21:
+-            // MasterFaceID, SlaveFaceID, TranslCode (1=dS1 2=dS2)
+-            {
+-              Vec<3> randomvec(-1.32834,3.82399,0.5429151);
+-              int maxtransl = -1;
+-              for(int i=0; i<nperiodicmasterfaces; i++)
+-                {
+-                  int tri1,tri2,transl;
+-                  Array<PointIndex> nodes1(3),nodes2(3);
+-                  Array<double> sortval1(3),sortval2(3);
+-                  in >> tri1 >> tri2 >> transl;
+-
+-                  if(transl > maxtransl)
+-                    maxtransl = transl;
+-		    
+-		    
+-                  for(int j=0; j<3; j++)
+-                    {
+-                      nodes1[j] = tris[tri1-1]->PNum(j+1);
+-                      sortval1[j] = Vec<3>(mesh[nodes1[j]])*randomvec;
+-                      nodes2[j] = tris[tri2-1]->PNum(j+1);
+-                      sortval2[j] = Vec<3>(mesh[nodes2[j]])*randomvec;
+-                    }
+-
+-                  BubbleSort(sortval1,nodes1);
+-                  BubbleSort(sortval2,nodes2);
+-
+-                  for(int j=0; j<3; j++)
+-                    mesh.GetIdentifications().Add(nodes1[j],nodes2[j],transl);
+-			
+-                }
+-              for(int i=1; i<= maxtransl; i++)
+-                mesh.GetIdentifications().SetType(i,Identifications::PERIODIC);
+-            }	      
+-            break;
+-
+-          case 22:
+-            // ElemID, FaceID0, FaceID1, FaceID2, FaceID3, PID
+-            {
+-              cout << "read elements (1)" << endl;
+-
+-              //SurfaceElementIndex surf[4];
+-              bool neg[4];
+-              int elemid;
+-              int domain;
+-		
+-              eldom.SetSize(nelts);
+-
+-              for(int i=0; i<nelts; i++)
+-                {
+-                  if(int(100.*i/nelts) % 5 == 0)
+-                    cout << int(100.*i/nelts)
+-#ifdef WIN32
+-                         << "%%\r"
+-#else
+-                         << "\%\r"
+-#endif 
+-                         << flush;
+-                  in >> elemid;
+-                  for(int j=0; j<4;j++)
+-                    {
+-                      in >> dummyint;
+-                      neg[j] = (dummyint < 0);
+-                      if(neg[j])
+-                        tetfacedata.Append(-dummyint-1);
+-                      //surf[j] = -dummyint-1;
+-                      else
+-                        tetfacedata.Append(dummyint-1);
+-                      tetfacedata.Append(((neg[j]) ? 1 : 0));
+-                      //surf[j] = dummyint-1;
+-                    }
+-		    
+-                  in >> domain;
+-                  eldom[i] = domain;
+-                  tetfacedata.Append(domain);
+-
+-                  if(i==0 || domain < minId3D)
+-                    minId3D = domain;
+-
+-                  if(domain > maxId3D)
+-                    maxId3D = domain;
+-		    
+-                  // 		    for(int j=0; j<4; j++)
+-                  // 		      {
+-                  // 			if(mesh.GetNSE() <= surf[j])
+-                  // 			  continue;
+-
+-                  // 			int faceind = 0;
+-                  // 			for(int k=1; k<=mesh.GetNFD(); k++)
+-                  // 			  {
+-                  // 			    if(mesh.GetFaceDescriptor(k).SurfNr() == mesh[surf[j]].GetIndex())
+-                  // 			      faceind = k;
+-                  // 			  }
+-                  // 			if(faceind)
+-                  // 			  {
+-                  // 			    if(neg[j])
+-                  // 			      mesh.GetFaceDescriptor(faceind).SetDomainOut(domain);
+-                  // 			    else
+-                  // 			      mesh.GetFaceDescriptor(faceind).SetDomainIn(domain);
+-                  // 			  }
+-                  // 			else
+-                  // 			  {
+-                  // 			    if(neg[j])
+-                  // 			      faceind = mesh.AddFaceDescriptor(FaceDescriptor(mesh[surf[j]].GetIndex(),0,domain,0));
+-                  // 			    else
+-                  // 			      faceind = mesh.AddFaceDescriptor(FaceDescriptor(mesh[surf[j]].GetIndex(),domain,0,0));
+-                  // 			    mesh.GetFaceDescriptor(faceind).SetBCProperty(mesh[surf[j]].GetIndex());
+-                  // 			  }
+-                  // 		      }
+-                }
+-              cout << endl;
+-		
+-		
+-              // 		Array<int> indextodescriptor(maxId2D+1);
+-		
+-              // 		for(int i=1; i<=mesh.GetNFD(); i++)
+-              // 		  indextodescriptor[mesh.GetFaceDescriptor(i).SurfNr()] = i;
+-		
+-		
+-              // 		for(SurfaceElementIndex i=0; i<mesh.GetNSE(); i++)
+-              // 		  mesh[i].SetIndex(indextodescriptor[mesh[i].GetIndex()]);
+-            }
+-            break;
+-
+-          case 23:
+-            // ElemID, NodeID0, NodeID1, NodeID2, NodeID3
+-            { 
+-              cout << "read elements (2)" << endl;
+-              Element el(TET);
+-              for(ElementIndex i=0; i<nelts; i++)
+-                {
+-                  in >> dummyint;
+-                  for(int j=1; j<=4; j++)
+-                    in >> el.PNum(j);
+-                  swap(el.PNum(1),el.PNum(2));
+-		    
+-                  el.SetIndex(eldom[i]);
+-                  mesh.AddVolumeElement(el);
+-                }	
+-            }	  
+-            break;
+-	      
+-          case 24:
+-            // Physical Object counts (#Obj3D,#Obj2D,#Obj1D,#Obj0D)
+-            {
+-              in >> numObj3D;
+-              userdata_int.Append(numObj3D);
+-              in >> numObj2D;
+-              userdata_int.Append(numObj2D);
+-              in >> numObj1D;
+-              userdata_int.Append(numObj1D);
+-              in >> numObj0D;
+-              userdata_int.Append(numObj0D);
+-            }
+-            break;
+-
+-          case 25:
+-            // Number of Ports (Ports are a subset of Object2D list)
+-            {
+-              in >> dummyint;
+-              //userdata_int.Append(dummyint);
+-            }
+-            break;
+-
+-          case 26:
+-            // Object3D GroupID, #Elems <immediately followed by> ElemID List
+-            {
+-              uid_to_group_3D.SetSize(maxId3D+1);
+-              uid_to_group_3D = -1;
+-              for(int i=0; i<numObj3D; i++)
+-                {
+-                  int groupid;
+-                  in >> groupid;
+-                  (*testout) << "3d groupid " << groupid << endl;
+-                  //userdata_int.Append(groupid);
+-                  int nelems;
+-                  in >> nelems;
+-                  //userdata_int.Append(nelems);
+-                  for(int j=0; j<nelems; j++)
+-                    {
+-                      in >> dummyint;
+-			
+-                      (*testout) << "read " << dummyint << endl;
+-                      //userdata_int.Append(dummyint);
+-			
+-                      if(dummyint < 0) 
+-                        dummyint *= -1;
+-                      uid_to_group_3D[eldom[dummyint-1]] = groupid;
+-                    }
+-                }
+-            }
+-            break;
+-
+-          case 27:
+-            // Object2D GroupID, #Faces <immediately followed by> FaceID List
+-            {
+-              Array<int> ports;
+-              //int totnum = 0;
+-              uid_to_group_2D.SetSize(maxId2D+1);
+-              uid_to_group_2D = -1;
+-
+-              for(int i=0; i<numObj2D; i++)
+-                {
+-                  int groupid;
+-                  in >> groupid;
+-                  (*testout) << "2d groupid " << groupid << endl;
+-                  //userdata_int.Append(groupid);
+-                  int nelems;
+-                  in >> nelems;
+-                  //userdata_int.Append(nelems);
+-                  for(int j=0; j<nelems; j++)
+-                    {
+-                      in >> dummyint;
+-                      char port;
+-                      while((port = in.get()) == ' ')
+-                        ;
+-
+-                      (*testout) << "read " << dummyint << endl;
+-                      if(dummyint < 0) 
+-                        dummyint *= -1;
+-                      int uid = tris[dummyint-1]->GetIndex();
+-
+-                      if(port == 'P' || port == 'p')
+-                        {
+-                          if(!ports.Contains(uid))
+-                            ports.Append(uid);
+-                        }
+-                      else
+-                        in.putback(port);
+-			
+-                      //userdata_int.Append(dummyint);
+-			
+-                      uid_to_group_2D[uid] = groupid;
+-                      (*testout) << "setting " << uid << endl;
+-
+-                      //totnum++;
+-                    }
+-                }
+-              mesh.SetUserData("TETmesh:ports",ports);
+-            }
+-            break;
+-
+-          case 28:
+-            // Object1D GroupID, #Edges <immediately followed by> EdgeID List
+-            {
+-              uid_to_group_1D.SetSize(maxId1D+1);
+-              uid_to_group_1D = -1;
+-
+-              for(int i=0; i<numObj1D; i++)
+-                {
+-                  int groupid;
+-                  in >> groupid;
+-                  //userdata_int.Append(groupid);
+-                  int nelems;
+-                  in >> nelems;
+-                  //userdata_int.Append(nelems);
+-                  for(int j=0; j<nelems; j++)
+-                    {
+-                      in >> dummyint;
+-                      //userdata_int.Append(dummyint);
+-
+-                      if(dummyint < 0) 
+-                        dummyint *= -1;
+-                      uid_to_group_1D[(*segmentdata[dummyint-1])[2]] = groupid;
+-                    }
+-                }
+-            }
+-            break;
+-
+-          case 29:
+-            // Object0D GroupID, #Nodes <immediately followed by> NodeID List
+-            {
+-              uid_to_group_0D.SetSize(maxId0D+1);
+-              uid_to_group_0D = -1;
+-              for(int i=0; i<numObj0D; i++)
+-                {
+-                  int groupid;
+-                  in >> groupid;
+-                  //userdata_int.Append(groupid);
+-                  int nelems;
+-                  in >> nelems;
+-                  //userdata_int.Append(nelems);
+-                  for(int j=0; j<nelems; j++)
+-                    {
+-                      in >> dummyint;
+-                      //userdata_int.Append(dummyint);
+-
+-                      if(dummyint < 0) 
+-                        dummyint *= -1;
+-                      uid_to_group_0D[point_pids[dummyint-1]] = groupid;
+-                    }
+-                }
+-            }
+-            break;
+-
+-
+-
+-          default:
+-            done = true;
+-	      
+-          }
+-	  
+-        if(inputsection == 4 && version == "1.1")
+-          inputsection++;
+-
+-        inputsection++;
+-      }
+-    in.close();
+-
+-
+-    mesh.SetUserData("TETmesh:double",userdata_double);
+-    userdata_int.Append(minId2D);
+-    userdata_int.Append(minId3D);
+-    mesh.SetUserData("TETmesh:int",userdata_int);   
+-    //if(version == "1.1")
+-    mesh.SetUserData("TETmesh:point_id",point_pids);
+-
+-    mesh.SetUserData("TETmesh:uid_to_group_3D",uid_to_group_3D);
+-    mesh.SetUserData("TETmesh:uid_to_group_2D",uid_to_group_2D);
+-    mesh.SetUserData("TETmesh:uid_to_group_1D",uid_to_group_1D);
+-    mesh.SetUserData("TETmesh:uid_to_group_0D",uid_to_group_0D);
+-
+-
+-    Array<SurfaceElementIndex> surfindices(tris.Size());
+-    surfindices = -1;
+-
+-    for(int i=0; i<tris.Size(); i++)
+-      {
+-        if(atof(version.c_str()) <= 1.999999)
+-          {
+-            if(tris[i]->GetIndex() > 0)
+-              surfindices[i] = mesh.AddSurfaceElement(*tris[i]);
+-          }
+-        else
+-          {
+-            if(tris[i]->GetIndex() > 0 &&
+-               tris[i]->GetIndex() < minId3D)
+-              {
+-                tris[i]->SetIndex(tris[i]->GetIndex()-minId2D+1);
+-                surfindices[i] = mesh.AddSurfaceElement(*tris[i]);
+-              }
+-          }
+-        delete tris[i];
+-      }
+-
+-      
+-    mesh.ClearFaceDescriptors();
+-    if(atof(version.c_str()) <= 1.999999)
+-      for(int i = 1; i <= maxId2D; i++)
+-        mesh.AddFaceDescriptor(FaceDescriptor(i,0,0,0));
+-    else
+-      for(int i=minId2D; i<minId3D; i++)
+-        mesh.AddFaceDescriptor(FaceDescriptor(i,0,0,0));
+-	
+-
+-    for(int i=0; i<tetfacedata.Size(); i+=9)
+-      {
+-        for(int j=0; j<4; j++)
+-          {
+-            SurfaceElementIndex surf = surfindices[tetfacedata[i+2*j]];
+-	      
+-            //if(mesh.GetNSE() <= surf)
+-            if(surf == -1)
+-              continue;
+-
+-            if(tetfacedata[i+2*j+1] == 1)
+-              mesh.GetFaceDescriptor(mesh[surf].GetIndex()).SetDomainOut(tetfacedata[i+8]);
+-            else
+-              mesh.GetFaceDescriptor(mesh[surf].GetIndex()).SetDomainIn(tetfacedata[i+8]);
+-			
+-
+-            /*
+-	      int faceind = 0;
+-	      for(int k=1; k<=mesh.GetNFD(); k++)
+-              {
+-              if(mesh.GetFaceDescriptor(k).SurfNr() == mesh[surf].GetIndex())
+-              faceind = k;
+-              }
+-	      if(faceind)
+-              {
+-              if(tetfacedata[i+4+j] == 1)
+-              mesh.GetFaceDescriptor(faceind).SetDomainOut(tetfacedata[i+8]);
+-              else
+-              mesh.GetFaceDescriptor(faceind).SetDomainIn(tetfacedata[i+8]);
+-              }
+-	      else
+-              {
+-              if(tetfacedata[i+4+j] == 1)
+-              faceind = mesh.AddFaceDescriptor(FaceDescriptor(mesh[surf].GetIndex(),0,tetfacedata[i+8],0));
+-              else
+-              faceind = mesh.AddFaceDescriptor(FaceDescriptor(mesh[surf].GetIndex(),tetfacedata[i+8],0,0));
+-              mesh.GetFaceDescriptor(faceind).SetBCProperty(mesh[surf].GetIndex());
+-              }
+-            */
+-          }
+-
+-      }
+-      
+-    //       Array<int> indextodescriptor(maxId2D+1);
+-		
+-    //       for(int i=1; i<=mesh.GetNFD(); i++)
+-    // 	indextodescriptor[mesh.GetFaceDescriptor(i).SurfNr()] = i;
+-		
+-		
+-    //       for(SurfaceElementIndex i=0; i<mesh.GetNSE(); i++)
+-    // 	mesh[i].SetIndex(indextodescriptor[mesh[i].GetIndex()]);
+-
+-
+-    for(int i=0; i<segmentdata.Size(); i++)
+-      {
+-        Segment seg;
+-
+-	  
+-        if((atof(version.c_str()) <= 1.999999 && (*segmentdata[i])[2] > 0) ||
+-           (atof(version.c_str()) > 1.999999  && (*segmentdata[i])[2] > 0 && (*segmentdata[i])[2] < minId2D))
+-          {
+-            seg[0] = (*segmentdata[i])[0];
+-            seg[1] = (*segmentdata[i])[1];
+-            seg.edgenr = (*segmentdata[i])[2];
+-            seg.epgeominfo[0].edgenr = (*segmentdata[i])[2];
+-            seg.epgeominfo[1].edgenr = (*segmentdata[i])[2];
+-            seg.si = (*segmentdata[i])[3]-minId2D+1;
+-            seg.surfnr1 = -1;//(*segmentdata[i])[3];
+-            seg.surfnr2 = -1;//(*segmentdata[i])[4];
+-            seg.geominfo[0].trignum = (*segmentdata[i])[5];
+-            seg.geominfo[1].trignum = (*segmentdata[i])[5];
+-            mesh.AddSegment(seg);
+-
+-            seg[0] = (*segmentdata[i])[1];
+-            seg[1] = (*segmentdata[i])[0];
+-            seg.si = (*segmentdata[i])[4]-minId2D+1;
+-            seg.surfnr1 = -1;//(*segmentdata[i])[3];
+-            seg.surfnr2 = -1;//(*segmentdata[i])[4];
+-            seg.geominfo[0].trignum = (*segmentdata[i])[6];
+-            seg.geominfo[1].trignum = (*segmentdata[i])[6];
+-            mesh.AddSegment(seg);
+-          }
+-        delete segmentdata[i];
+-      }
+-
+-    /*
+-      for(int i=mesh.GetNSeg(); i>=1; i--)
+-      if(mesh.LineSegment(i).epgeominfo[0].edgenr == 0 ||
+-      mesh.LineSegment(i).epgeominfo[1].edgenr == 0)
+-      mesh.FullDeleteSegment(i);
+-    */	
+-  
+-    mesh.CalcSurfacesOfNode();
+-      
+-  }
+-}
+-
+-
+Index: writefepp.cpp
+===================================================================
+--- writefepp.cpp	(revision 0)
++++ writefepp.cpp	(revision 0)
+@@ -0,0 +1,131 @@
++/*
++ * FEPP .. a finite element package developed at University Linz, Austria
++ */
++
++#include "csg.hpp"
++#include "meshing.hpp"
++
++namespace netgen
++{
++
++void WriteFEPPFormat (const Mesh & mesh,
++		      const CSGeometry & geom,
++		      const string & filename)
++{
++
++  ofstream outfile (filename.c_str());
++
++  if (mesh.GetDimension() == 3)
++
++    {
++
++      // output for FEPP
++
++      int np = mesh.GetNP();
++      int ne = mesh.GetNE();
++      int nse = mesh.GetNSE();
++      int ns = mesh.GetNFD();
++      int i, j;
++
++      outfile.precision(5);
++      outfile.setf (ios::fixed, ios::floatfield);
++      outfile.setf (ios::showpoint);
++
++      outfile << "volumemesh4" << endl;
++      outfile << nse << endl;
++      for (i = 1; i <= nse; i++)
++	{
++	  const Element2d & el = mesh.SurfaceElement(i);
++
++	  //	  int facenr = mesh.facedecoding.Get(el.GetIndex()).surfnr;
++	  outfile.width(4);
++	  outfile << el.GetIndex() << " ";
++	  outfile.width(4);
++	  //	  outfile << mesh.GetFaceDescriptor(el.GetIndex()).BCProperty() << " ";
++	  outfile << mesh.GetFaceDescriptor(el.GetIndex()).BCProperty() << " ";
++	  outfile.width(4);
++	  outfile << el.GetNP() << "    ";
++	  for (j = 1; j <= el.GetNP(); j++)
++	    {
++	      outfile.width(8);
++	      outfile << el.PNum(j);
++	    }
++	  outfile << "\n";
++	}
++
++
++      outfile << ne << "\n";
++      for (i = 1; i <= ne; i++)
++	{
++	  const Element & el = mesh.VolumeElement(i);
++	  outfile.width(4);
++	  outfile << el.GetIndex() << " ";
++	  outfile.width(4);
++	  outfile << el.GetNP() << " ";
++	  for (j = 1; j <= el.GetNP(); j++)
++	    {
++	      outfile.width(8);
++	      outfile << el.PNum(j);
++	    }
++	  outfile << "\n";
++	}
++
++      outfile << np << "\n";
++      for (i = 1; i <= np; i++)
++	{
++	  const Point3d & p = mesh.Point(i);
++
++	  outfile.width(10);
++	  outfile << p.X() << " ";
++	  outfile.width(9);
++	  outfile << p.Y() << " ";
++	  outfile.width(9);
++	  outfile << p.Z() << "\n";
++	}
++
++      /*
++      if (typ == WRITE_FEPPML)
++	{
++	  int nbn =  mesh.mlbetweennodes.Size();
++	  outfile << nbn << "\n";
++	  for (i = 1; i <= nbn; i++)
++	    outfile << mesh.mlbetweennodes.Get(i).I1() << " "
++		    << mesh.mlbetweennodes.Get(i).I2() << "\n";
++
++
++	  //	  int ncon = mesh.connectedtonode.Size();
++	  //	  outfile << ncon << "\n";
++	  //	  for (i = 1; i <= ncon; i++)
++	  //	    outfile << i << " " << mesh.connectedtonode.Get(i) << endl;
++	}
++      */
++
++
++      // write CSG surfaces
++      if (&geom && geom.GetNSurf() >= ns)
++	{
++	  outfile << ns << endl;
++	  for (i = 1; i <= ns; i++)
++	    geom.GetSurface(mesh.GetFaceDescriptor(i).SurfNr())->Print(outfile);
++	}
++      else
++	outfile << "0" << endl;
++    }
++
++
++  else
++
++    { // 2D fepp format
++
++      ;
++      /*
++      extern SplineGeometry2d * geometry2d;
++      if (geometry2d)
++	Save2DMesh (mesh, &geometry2d->GetSplines(), outfile);
++      else
++	Save2DMesh (mesh, 0, outfile);
++      */
++    }
++}
++
++}
+Index: interface.hpp
+===================================================================
+--- interface.hpp	(revision 0)
++++ interface.hpp	(revision 0)
+@@ -0,0 +1,280 @@
++#ifndef FILE_INTERFACE
++#define FILE_INTERFACE
++/** \file interface.hpp
++  * \brief Write and read functions for various file formats.
++  * \author Many
++  * \date 17 June 2009
++  */
++
++namespace netgen
++{
++
++/** Reads a mesh of native format.
++  * \param[in,out] mesh Mesh to be filled.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void ReadFile (Mesh & mesh,
++               const string & filename);
++
++/** Reads a mesh of TET format.
++  * \param[in,out] mesh Mesh to be filled.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void ReadTETFormat (Mesh & mesh,
++                    const string & filename);
++
++/** Reads a mesh of Pro/ENGINEER neutral format.
++  * \param[in,out] mesh Mesh to be filled.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void ReadFNFFormat (Mesh & mesh,
++                    const string & filename);
++
++/** Gets the list of supported formats for writing.
++  * \param[in,out] names Array with the names of the supported formats.
++  */
++void RegisterUserFormats (Array<const char*> & names);
++
++/** Writes to the mesh to a file.
++  * \param[in] format Format of output. 
++  * \param[in] mesh  Mesh to be written.
++  * \param[in] geom Geometry to be written (optional).
++  * \param[in] filename Path to file.
++  * \returns 1 when format was recognized otherwise 0
++  * \ingroup interface
++  */
++bool WriteUserFormat (const string & format,
++                      const Mesh & mesh,
++                      const CSGeometry & geom,
++                      const string & filename);
++
++/* Deprecated.
++void WriteFile (int type,
++		const Mesh & mesh,
++		const CSGeometry & geom,
++		const char * filename,
++		const char * geomfile = NULL,
++		double h = 0);
++*/
++
++/** Writes mesh to netgens format.
++  * Surface and volume mesh.
++  * \param[in] mesh  Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteNeutralFormat (const Mesh & mesh,
++                         const string & filename);
++
++/** Writes mesh to netgens surface format.
++  * Surface mesh only.
++  * \param[in] mesh  Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteSurfaceFormat (const Mesh & mesh,
++                         const string & filename);
++
++/** Writes mesh to EdgeElement format.
++  * Edges only.
++  * \param[in] mesh  Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteEdgeElementFormat (const Mesh & mesh,
++                             const string & filename);
++
++/** Writes mesh to STL format.
++  * Surface mesh, only triangles.
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteSTLFormat (const Mesh & mesh,
++                     const string & filename);
++
++/** Writes mesh to VRML format.
++  * Surface mesh only.
++  * \author Bartosz Sawicki <sawickib@ee.edu.pl>
++  * \param[in] mesh Mesh to be written.
++  * \param[in] faces true to draw faces, otherwise only lines.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteVRMLFormat (const Mesh & mesh,
++                      bool faces,
++                      const string & filename);
++
++/** Writes mesh to FEPP format.
++  * Volume mesh and CSG only.
++  * \param[in] mesh Mesh to be written.
++  * \param[in] geom Geometry to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteFEPPFormat (const Mesh & mesh,
++                      const CSGeometry & geom,
++                      const string & filename);
++
++/** Writes mesh to Gmsh 1 format.
++  * Only linear tetrahedra, triangles and quadrangles.
++  * \author Paul Carrico
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteGmshFormat (const Mesh & mesh,
++                      const string & filename);
++
++/** Writes mesh to Gmsh 2 format.
++  * Current features of this function include:
++  * 1. Exports Triangles, Quadrangles and Tetrahedra
++  * 2. Supports upto second order elements of each type
++  * \author Philippose Rajan
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteGmsh2Format (const Mesh & mesh,
++			           const string & filename);
++
++/** Writes mesh to Chemnitz format.
++  * Volume and surface.
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteChemnitz (const Mesh & mesh,
++                    const string & filename);
++
++/** Writes mesh to JCMwave format.
++  * Only Prisms and tetrahedrons, triangles and quadrangles.
++  * \author Sven Burger
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteJCMFormat (const Mesh & mesh,
++                     const string & filename);
++
++/** Writes mesh to DiffPack format.
++  * Volume and surface.
++  * \author Bartosz Sawicki <sawicki@ee.pw.edu.pl>
++  * \author Jacques Lechelle <jacques.lechelle@wanadoo.fr>
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteDiffPackFormat (const Mesh & mesh,
++                          const string & filename);
++
++/** Writes mesh to Tochnog format.
++  * Only tetrahedrons.
++  * \author Andreas Seltmann <a.Seltmann@lsw.uni-heidelberg.de>
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteTochnogFormat (const Mesh & mesh,
++                         const string & filename);
++
++/** Writes mesh and geometry to TecPlot format.
++  * Only tetrahedrons and triangles and CSG.
++  * \author Jawor Georgview
++  * \param[in] mesh Mesh to be written.
++  * \param[in] geom Geometry to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteTecPlotFormat (const Mesh & mesh,
++                         const CSGeometry & geom,
++                         const string & filename);
++
++/** Writes mesh to Abaqus format.
++  * Only tetrahedrons (4 and 10 nodes).
++  * Writes boundary conditions.
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteAbaqusFormat (const Mesh & mesh,
++                        const string & filename);
++
++/** Writes mesh to Fluent format.
++  * Only tetrahedrons. 
++  * \author Johannes Gerstmayr
++  * \param[in] mesh Mesh to be written.
++  * \param[in] geom Geometry to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteFluentFormat (const Mesh & mesh,
++                        const string & filename);
++
++/** Writes mesh to Permas format.
++  * Only tetrahedrons (4 or 10) and triangles (3 and 6) and quadrangles (4).
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WritePermasFormat (const Mesh & mesh,
++                        const string & filename);
++
++/** Writes mesh to FEAP format.
++  * Only volume.
++  * \author Albrecht Rieger <rieger@ibnm.uni-hannover.do>
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteFEAPFormat (const Mesh & mesh,
++                      const string & filename);
++
++/** Writes mesh to Elmer format..
++  * Volume and surface.
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteElmerFormat (const Mesh & mesh,
++                       const string & filename);
++
++/** Writes mesh to TET format.
++  * Only tetrahedrons.
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteTETFormat (const Mesh & mesh,
++                     const string & filename);
++
++/** Writes mesh to Dolfin format.
++  * Only tetrahedrons.
++  * \author Kent-Andre Mardal <kent-and@simula.no>
++  * \param[in] mesh Mesh to be written.
++  * \param[in] filename Path to file.
++  * \ingroup interface
++  */
++void WriteDolfinFormat (const Mesh & mesh,
++                        const string & filename);
++
++/** Writes mesh to VTU format.
++  * VTU is the VTK format for unstructured meshes. 
++  * All elements in netgen is supported, no extra data.
++  * \author Mikael Öhman <mikael.ohman@chalmers.se>
++  * \param[in] mesh  Mesh to be written.
++  * \param[in] filename Path to file.
++  * \param[in] noSurf true to ignore surface elements.
++  * \param[in] noVol true to ignore volume elements.
++  * \ingroup interface
++  */
++bool WriteVTUFormat (const Mesh & mesh,
++                     const string & filename,
++                     bool noSurf = false,
++                     bool noVol = false);
++
++}
++#endif
+Index: writetet.cpp
+===================================================================
+--- writetet.cpp	(revision 159)
++++ writetet.cpp	(working copy)
+@@ -1,18 +1,7 @@
++#include "meshing.hpp"
+ 
+-#include <mystdlib.h>
+-
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <acisgeom.hpp>
+-#include <meshing.hpp>
+-
+ namespace netgen
+ {
+-
+-#include "writeuser.hpp"
+-  
+-  
+   void WriteTETFormat (const Mesh & mesh,
+ 		       const string & filename)//, const string& problemType )
+   {
+Index: writefluent.cpp
+===================================================================
+--- writefluent.cpp	(revision 159)
++++ writefluent.cpp	(working copy)
+@@ -3,20 +3,11 @@
+ //  Johannes Gerstmayr, University Linz
+ //
+ 
+-#include <mystdlib.h>
++#include "meshing.hpp"
+ 
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+ namespace netgen
+ {
+ 
+-#include "writeuser.hpp"
+-
+-
+-
+ void WriteFluentFormat (const Mesh & mesh,
+ 			const string & filename)
+ 
+Index: writegmsh.cpp
+===================================================================
+--- writegmsh.cpp	(revision 159)
++++ writegmsh.cpp	(working copy)
+@@ -11,26 +11,18 @@
+  * in only one file
+  **************************************/
+ 
+-#include <mystdlib.h>
++#include "meshing.hpp"
+ 
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+ 
+-
+-
+ /*
+  *  GMSH mesh format
+  *  points, elements, surface elements and physical entities
+  */
+ 
++
+ void WriteGmshFormat (const Mesh & mesh,
+-			 const CSGeometry & geom,
+ 			 const string & filename)
+ {
+   ofstream outfile (filename.c_str());
+Index: readuser.cpp
+===================================================================
+--- readuser.cpp	(revision 159)
++++ readuser.cpp	(working copy)
+@@ -2,18 +2,11 @@
+ //  Read user dependent output file
+ //
+ 
++#include "meshing.hpp"
++#include "interface.hpp"
+ 
+-#include <mystdlib.h>
+-
+-
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+ 
+   void ReadFile (Mesh & mesh,
+                  const string & hfilename)
+Index: writetochnog.cpp
+===================================================================
+--- writetochnog.cpp	(revision 159)
++++ writetochnog.cpp	(working copy)
+@@ -6,19 +6,11 @@
+ //  Andreas Seltmann
+ //  email:  A.Seltmann@lsw.uni-heidelberg.de
+ //
+-#include <mystdlib.h>
++#include "meshing.hpp"
+ 
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+-
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+ 
+-
+ void WriteTochnogFormat (const Mesh & mesh,
+ 			 const string & filename)
+ {
+Index: writestl.cpp
+===================================================================
+--- writestl.cpp	(revision 0)
++++ writestl.cpp	(revision 0)
+@@ -0,0 +1,48 @@
++/*
++ *  save surface mesh as STL file
++ */
++
++#include "meshing.hpp"
++
++namespace netgen
++{
++
++void WriteSTLFormat (const Mesh & mesh,
++            const string & filename)
++{
++    cout << "\nWrite STL Surface Mesh" << endl;
++    if (!mesh.PureTrigMesh())
++    {
++        cout << "Error: Mesh contains non trig element" << endl;
++        return;
++    }
++
++    ofstream outfile (filename.c_str());
++    outfile.precision(10);
++    outfile << "solid" << endl;
++    for (int i = 1; i <= mesh.GetNSE(); i++)
++    {
++        outfile << "facet normal ";
++        const Point3d& p1 = mesh.Point(mesh.SurfaceElement(i).PNum(1));
++        const Point3d& p2 = mesh.Point(mesh.SurfaceElement(i).PNum(2));
++        const Point3d& p3 = mesh.Point(mesh.SurfaceElement(i).PNum(3));
++
++        Vec3d normal = Cross(p2-p1,p3-p1);
++        if (normal.Length() != 0)
++            normal /= (normal.Length());
++
++        outfile << normal.X() << " " << normal.Y() << " " << normal.Z() << "\n";
++        outfile << "outer loop\n";
++
++        outfile << "vertex " << p1.X() << " " << p1.Y() << " " << p1.Z() << "\n";
++        outfile << "vertex " << p2.X() << " " << p2.Y() << " " << p2.Z() << "\n";
++        outfile << "vertex " << p3.X() << " " << p3.Y() << " " << p3.Z() << "\n";
++
++        outfile << "endloop\n";
++        outfile << "endfacet\n";
++    }
++    outfile << "endsolid" << endl;
++    outfile.close();
++}
++
++}
+Index: writeelmer.cpp
+===================================================================
+--- writeelmer.cpp	(revision 159)
++++ writeelmer.cpp	(working copy)
+@@ -4,21 +4,12 @@
+ //
+ //
+ 
+-#include <mystdlib.h>
+-
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+ #include <sys/stat.h>
++#include "meshing.hpp"
+ 
+-
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+ 
+-
+-
+ void WriteElmerFormat (const Mesh &mesh,
+ 			 const string &filename)
+ {
+Index: read_fnf_mesh.cpp
+===================================================================
+--- read_fnf_mesh.cpp	(revision 159)
++++ read_fnf_mesh.cpp	(working copy)
+@@ -1,446 +0,0 @@
+-
+-//
+-//  Read Pro/ENGINEER neutral format
+-//
+-
+-#include <mystdlib.h>
+-
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-#include <sys/stat.h>
+-
+-
+-namespace netgen
+-{
+-#include "writeuser.hpp"
+-
+-  bool ReadLine (istream & in, string & buf)
+-  {
+-    do
+-      {
+-        buf = "";
+-        
+-        while (in.good())
+-          {
+-            char ch = in.get();
+-            if (ch == '\n') break;
+-            if (ch == '\r') break;
+-            if (ch == '\\')
+-              {
+-                // while (iswhite (ch = in.get() )
+-                ch = in.get();   // '\n'   CR
+-                ch = in.get();   // '\n'   LF
+-              }
+-            else
+-              buf += ch;
+-          }
+-      }
+-    while (in.good() && (buf == "" || buf[0] == '#'));
+-    
+-    return in.good();
+-  }
+-  
+-
+-
+-
+-  
+-  class LoadType
+-  {
+-  public:
+-    int id;
+-    string name;
+-    string placement;
+-    string valuetype;
+-    Array<double> places;
+-  };
+-
+-
+-
+-  
+-  void ReadFNFFormat (Mesh & mesh, 
+-                      const string & filename)
+-  {
+-    ifstream fin (filename.c_str());
+-
+-    string buf;
+-
+-    mesh.SetDimension (3);
+-
+-    while (ReadLine (fin, buf))
+-      {
+-        stringstream sbuf(buf);
+-        string start_sect, token; char ch;
+-        
+-        sbuf >> start_sect;
+-
+-        if (start_sect == "%START_SECT")
+-          {
+-            sbuf >> ch >> token;
+-            
+-            if (token == "HEADER")
+-              {
+-                while (1)
+-                  {
+-                    ReadLine (fin, buf);
+-                    stringstream sbuf(buf);
+-                    string token;
+-                    
+-                    sbuf >> token;
+-                    
+-                    if (token == "%TITLE")
+-                      {
+-                        char ch;
+-                        string name;
+-                        sbuf >> ch >> name;
+-                        cout << "Title: " << name << endl;
+-                      }
+-                    else if (token == "%STATISTICS")
+-                      {
+-                        ;
+-                      }
+-                    else if (token == "%END_SECT")
+-                      {
+-                        break;
+-                      }
+-                    else
+-                      {
+-                        cout << "SECTION HEADER, unknown field: " << buf << endl;
+-                      }
+-                  }                
+-              }
+- 
+-
+-            else if (token == "ELEM_TYPES")
+-              {
+-                while (1)
+-                  {
+-                    ReadLine (fin, buf);
+-                    stringstream sbuf(buf);
+-                    string token;
+-                    
+-                    sbuf >> token;
+-                    
+-                    if (token == "%ELEM_TYPE")
+-                      {
+-			int nr;
+-			string def;
+-                        char ch;
+-                        sbuf >> nr >> def >> ch;
+-			if (def == "DEF")
+-			  {
+-			    string classname, type;
+-			    sbuf >> classname >> type;
+-			    if (classname != "SOLID" || type != "TETRA")
+-			      cerr << "Element not supported: " << buf << endl;
+-			  }
+-                      }
+-                    else if (token == "%END_SECT")
+-                      {
+-                        break;
+-                      }
+-                    else
+-                      {
+-                        cout << "SECTION ELEM_TYPE, unknown field: " << buf << endl;
+-                      }
+-                  }                
+-              }
+- 
+-
+-            else if (token == "COORD_SYSTEMS")
+-              {
+-                while (1)
+-                  {
+-                    ReadLine (fin, buf);
+-                    stringstream sbuf(buf);
+-                    string token;
+-                    
+-                    sbuf >> token;
+-                    
+-                    if (token == "%END_SECT")
+-                      {
+-                        break;
+-                      }
+-                    else
+-                      {
+-                        // cout << "COORD_SYSTEMS, unknown field: " << buf << endl;
+-                      }
+-                  }                
+-              }
+-
+-
+- 
+-            else if (token == "MATERIALS")
+-              {
+-                Array<double> young_modulus, poisson_ratio, mass_density;
+-
+-                while (1)
+-                  {
+-                    ReadLine (fin, buf);
+-                    stringstream sbuf(buf);
+-                    string token;
+-                    
+-                    sbuf >> token;
+-                    
+-                    if (token == "%MATERIAL")
+-                      {
+-                        int nr;
+-                        string prop;
+-                        char ch;
+-                        double val;
+-
+-                        sbuf >> nr >> prop >> ch;
+-                        if (prop == "DEF")
+-                          {
+-                            ;
+-                          }
+-                        else
+-                          {
+-                            sbuf >> val;
+-                            if (prop == "YOUNG_MODULUS")
+-                              young_modulus.Append (val);
+-                            else if  (prop == "POISSON_RATIO")
+-                              poisson_ratio.Append (val);
+-                            else if  (prop == "MASS_DENSITY")
+-                              mass_density.Append (val);
+-                          }
+-                      }
+-                    else if (token == "%END_SECT")
+-                      {
+-                        mesh.SetUserData ("YOUNG_MODULUS", young_modulus);
+-                        mesh.SetUserData ("POISSON_RATIO", poisson_ratio);
+-                        mesh.SetUserData ("MASS_DENSITY", mass_density);
+-                        break;
+-                      }
+-                    else
+-                      {
+-                        cout << "SECTION MATERIALS, unknown field: " << buf << endl;
+-                      }
+-                  }
+-              }
+-
+-            
+-            else if (token == "MESH")
+-              {
+-                while (1)
+-                  {
+-                    ReadLine (fin, buf);
+-                    stringstream sbuf(buf);
+-                    string token;
+-                    sbuf >> token;
+-                    if (token == "%NODE")
+-                      {
+-                        string st;
+-                        char ch;
+-                        int nr, ks_id;
+-                        double x,y,z;
+-                        sbuf >> nr >> st >> ch >> x >> y >> z >> ks_id;
+-                        mesh.AddPoint (Point3d (x,y,z) );
+-                      }
+-                    else if (token == "%ELEM")
+-                      {
+-                        string elemid, def;
+-                        char ch;
+-                        int elnr, typid, matid;
+-                        string propid;
+-                        sbuf >> elnr >> def >> ch;
+-                        sbuf >> typid >> matid >> propid;
+-                        Array<int> pnums;
+-                        while (1)
+-                          {
+-                            int pn;
+-                            sbuf >> pn;
+-                            if (!sbuf.good()) break;
+-                            pnums.Append (pn);
+-                          }
+-                        int pe2ng [] = { 0, 1, 2, 3, 4, 7, 5, 6,  8, 9 };
+-                        Element el(pnums.Size());
+-                        for (int j = 0; j < pnums.Size(); j++)
+-                          el[pe2ng[j]] = pnums[j];
+-                        el.SetIndex (matid);
+-                        mesh.AddVolumeElement (el);
+-                      }
+-                    else if (token == "%END_SECT")
+-                      {
+-                        break;
+-                      }
+-                    else
+-                      {
+-                        cout << "SECTION MESH, unknown: " << buf << endl;
+-                      }
+-                  }
+-              }
+-            else if (token == "MESH_TOPOLOGY")
+-              {
+-                while (1)
+-                  {
+-                    ReadLine (fin, buf);
+-                    stringstream sbuf(buf);
+-                    string token, kw;
+-                    int nr;
+-                    char ch;
+-
+-                    sbuf >> token;
+-                    if (token == "%EDGE")
+-                      {
+-                        sbuf >> nr >> kw >> ch;
+-                        if (kw == "NODES")
+-                          {
+-                            Array<int> enums;
+-                            while (1)
+-                              {
+-                                int en;
+-                                sbuf >> en;
+-                                if (!sbuf.good()) break;
+-                                enums.Append (en);
+-                              }
+-                            for (int j = 0; j+2 < enums.Size(); j+=2)
+-                              {
+-                                Segment seg;
+-                                seg[0] = enums[j];
+-                                seg[1] = enums[j+2];
+-                                seg[2] = enums[j+1];
+-                                seg.edgenr = nr;
+-                                mesh.AddSegment (seg);
+-                              }
+-                          }
+-                      }
+-                    else if (token == "%SURFACE")
+-                      {
+-                        sbuf >> nr >> kw >> ch;
+-                        if (kw == "FACES")
+-                          {
+-                            Array<int> fnums;
+-                            while (1)
+-                              {
+-                                int fn;
+-                                sbuf >> fn;
+-                                if (!sbuf.good()) break;
+-                                fnums.Append (fn);
+-                              }                            
+-
+-                            FaceDescriptor fd(-1, -1, -1, -1);
+-                            fd.SetBCProperty (nr);
+-                            mesh.AddFaceDescriptor (fd);
+-                              
+-                            for (int j = 0; j < fnums.Size(); j += 2)
+-                              {
+-                                int elnr = fnums[j];
+-                                int fnr = fnums[j+1];
+-                                
+-                                const Element & el = mesh.VolumeElement (elnr);
+-                                Element2d el2d;
+-                                el.GetFace (fnr, el2d);
+-                                el2d.SetIndex (nr);
+-                                  
+-                                mesh.AddSurfaceElement (el2d);
+-                              }
+-                          }
+-                      }
+-                    else if (token == "%END_SECT")
+-                      {
+-                        break;
+-                      }
+-                    else
+-                      {
+-                        cout << "SECTION MESH, unknown: " << buf << endl;
+-                      }
+-                  }
+-              }
+-
+-
+-
+- 
+-            else if (token == "LOADS")
+-              {
+-                Array<LoadType*> loadtypes;
+-
+-                while (1)
+-                  {
+-                    ReadLine (fin, buf);
+-                    stringstream sbuf(buf);
+-                    string token;
+-                    
+-                    sbuf >> token;
+-                    
+-                    if (token == "%LOAD_TYPE")
+-                      {
+-                        string def;
+-                        char ch;
+-
+-                        LoadType * lt = new LoadType;
+-                        sbuf >> lt->id >> def >> ch >> lt->name >> lt->placement >> lt->valuetype;
+-                        
+-                        if (lt->name == "DISPLACEMENT")
+-                          cout << "loadtype DISPLACEMENT found" << endl;
+-
+-                        if (lt->placement != "FACE" && lt->placement != "EDGE" && lt->placement != "NODE")
+-                          cout << "unsupported placement " << lt->placement << endl;
+-
+-                        loadtypes.Append (lt);
+-                      }
+-
+-                    else if (token == "%LOAD")
+-                      {
+-                        int id;
+-                        string def;
+-                        char ch;
+-                        int placement;
+-                        int load_type_id, con_case_id;
+-                        sbuf >> id >> def >> ch;
+-                        
+-                        if (def == "DEF")
+-                          {
+-                            sbuf >> load_type_id >> con_case_id;
+-                          }
+-                        if (def == "VAL")
+-                          {
+-                            sbuf >> placement;
+-                            for (int i = 0; i < loadtypes.Size(); i++)
+-                              if (load_type_id == loadtypes[i]->id)
+-                                loadtypes[i]->places.Append (placement);
+-                          }
+-                      }                    
+-                    
+-                    else if (token == "%END_SECT")
+-                      {
+-                        for (int i = 0; i < loadtypes.Size(); i++)
+-                          {
+-                            if (loadtypes[i]->placement == "FACE" && loadtypes[i]->name == "DISPLACEMENT")
+-                              {
+-                                mesh.SetUserData ("CONSTRAINT_DISP_FACE", loadtypes[i]->places);
+-                                cout << "constrained faces: " << loadtypes[i]->places << endl;
+-                              }
+-                            if (loadtypes[i]->placement == "EDGE" && loadtypes[i]->name == "DISPLACEMENT")
+-                              {
+-                                mesh.SetUserData ("CONSTRAINT_DISP_EDGE", loadtypes[i]->places);
+-                                cout << "constrained edges: " << loadtypes[i]->places << endl;
+-                              }
+-                            if (loadtypes[i]->placement == "NODE" && loadtypes[i]->name == "DISPLACEMENT")
+-                              {
+-                                mesh.SetUserData ("CONSTRAINT_DISP_NODE", loadtypes[i]->places);
+-                                cout << "constrained nodes: " << loadtypes[i]->places << endl;
+-                              }
+-                          }
+-                        break;
+-                      }
+-                    else
+-                      {
+-                        cout << "SECTION LOADS, unknown field: " << buf << endl;
+-                      }
+-                  }
+-              }
+-
+-
+-
+-            else
+-              {
+-                cout << "unknown section " << token << endl;
+-              }
+-          }
+-        else
+-          cout << "parse line: (" << buf << ")" << endl;
+-      }
+-  }
+-}
+Index: writediffpack.cpp
+===================================================================
+--- writediffpack.cpp	(revision 159)
++++ writediffpack.cpp	(working copy)
+@@ -6,21 +6,13 @@
+ //  extended by
+ //  Jacques Lechelle <jacques.lechelle@wanadoo.fr>
+ //
+-#include <mystdlib.h>
++#include "meshing.hpp"
+ 
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+-
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+ 
+ 
+ void WriteDiffPackFormat (const Mesh & mesh,
+-			  const CSGeometry & geom,
+ 			  const string & filename)
+ {
+   //   double scale = globflags.GetNumFlag ("scale", 1);
+Index: writejcm.cpp
+===================================================================
+--- writejcm.cpp	(revision 159)
++++ writejcm.cpp	(working copy)
+@@ -3,20 +3,12 @@
+ //  07.07.2005, Sven Burger, ZIB Berlin
+ //
+ 
++#include "meshing.hpp"
+ 
+-#include <mystdlib.h>
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-#include <sys/stat.h>
+-
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+ 
+ void WriteJCMFormat (const Mesh & mesh,
+-                     const CSGeometry & geom,
+                      const string & filename)
+ {
+   if (mesh.GetDimension() != 3)
+Index: writetecplot.cpp
+===================================================================
+--- writetecplot.cpp	(revision 159)
++++ writetecplot.cpp	(working copy)
+@@ -2,18 +2,11 @@
+ //
+ // TECPLOT file by Jawor Georgiew
+ //
+-#include <mystdlib.h>
++#include "csg.hpp"
++#include "meshing.hpp"
+ 
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+-
+-
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+ 
+ void WriteTecPlotFormat (const Mesh & mesh,
+ 			 const CSGeometry & geom,
+Index: writedolfin.cpp
+===================================================================
+--- writedolfin.cpp	(revision 159)
++++ writedolfin.cpp	(working copy)
+@@ -4,66 +4,86 @@
+ //  by
+ //  Kent-Andre Mardal <kent-and@simula.no>
+ 
++// Mikael Öhman <mikael.ohman@chalmers.se>
++// Fixed URL, added more elements, added 2D. 
++// Needs verificitation since the DOLFIN manual didn't contain any specification for the file format.
++// I simply used the most obvious naming.
+ 
+-#include <mystdlib.h>
++#include "meshing.hpp"
+ 
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+ namespace netgen
+ {
++    void WriteDolfinFormat (const Mesh & mesh, const string & filename)
++    {
++        cout << "start writing dolfin export" << endl;
+ 
+-#include "writeuser.hpp"
++        int np = mesh.GetNP();
++        int ne = mesh.GetNE();
++        int nse = mesh.GetNSE();
++        int nsd = mesh.GetDimension(); 
+ 
++        ofstream outfile(filename.c_str());
+ 
++        outfile.precision(8);
++        outfile.setf(ios::fixed, ios::floatfield);
++        outfile.setf(ios::showpoint);
+ 
+-  void WriteDolfinFormat (const Mesh & mesh, const string & filename)
+-  {
+-    cout << "start writing dolfin export" << endl;
++        if (nsd == 3) {
++            outfile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
++            outfile << "<dolfin xmlns:dolfin=\"http://www.fenics.org/wiki/DOLFIN\">\n";
++            outfile << "  <mesh celltype=\"tetrahedron\" dim=\"3\">\n";
++            outfile << "    <vertices size=\""<<np<<"\">\n";
++            for (int i = 1; i <= np; i++) { 
++                const Point3d & p = mesh.Point(i);
++                outfile << "      <vertex index=\""<<i-1<<"\" x=\""<<p.X()<<"\" y=\""<<p.Y()<<"\" z=\""<<p.Z()<<"\"/>\n";
++            }
++            outfile << "    </vertices>\n";
+ 
+-    int np = mesh.GetNP();
+-    int ne = mesh.GetNE();
+-    // int nse = mesh.GetNSE();
+-    int nsd = mesh.GetDimension(); 
+-    // int invertsurf = mparam.inverttrigs;
+-    // int i, j;
++            outfile << "    <cells size=\""<<ne<<"\">\n";
++            for (int i = 1; i <= ne; i++) {
++                Element el = mesh.VolumeElement(i);
++                if (mparam.inverttets) el.Invert();
++                ELEMENT_TYPE type = el.GetType();
++                if (type == TET || type == TET10)
++                    outfile << "      <tetrahedron index=\""<<i-1<<"\" v0=\""<<el.PNum(1)-1<<"\" v1=\""<<el.PNum(2)-1<<"\" v2=\""<<el.PNum(3)-1<<"\" v3=\""<<el.PNum(4)-1<<"\"/>\n";
++                else if (type == HEX)
++                    outfile << "      <hexahedron index=\""<<i-1<<"\" v0=\""<<el.PNum(1)-1<<"\" v1=\""<<el.PNum(2)-1<<"\" v2=\""<<el.PNum(3)-1<<"\" v3=\""<<el.PNum(4)-1
++                                                                 <<"\" v4=\""<<el.PNum(5)-1<<"\" v5=\""<<el.PNum(6)-1<<"\" v6=\""<<el.PNum(7)-1<<"\" v7=\""<<el.PNum(8)-1<<"\"/>\n";
++                else
++                    cout << "Warning unsupported element." << endl;
++            }
++            outfile << "    </cells>\n"; 
++            outfile << "  </mesh>\n"; 
++            outfile << "</dolfin>"; 
++        }
++        else if (nsd == 2) {
++            outfile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
++            outfile << "<dolfin xmlns:dolfin=\"http://www.fenics.org/wiki/DOLFIN\">\n";
++            outfile << "  <mesh celltype=\"triangle\" dim=\"2\">\n"; 
++            outfile << "    <vertices size=\""<<np<<"\">\n"; 
++            for (int i = 1; i <= np; i++) { 
++                const Point3d & p = mesh.Point(i);
++                outfile << "      <vertex index=\""<<i-1<<"\" x=\""<<p.X()<<"\" y=\""<<p.Y()<<"\"/>\n"; 
++            }
++            outfile << "    </vertices>\n";
+ 
+-    ofstream outfile (filename.c_str());
+-
+-    // char str[100];
+-    outfile.precision(8);
+-    outfile.setf (ios::fixed, ios::floatfield);
+-    outfile.setf (ios::showpoint);
+-
+-    if ( nsd == 3) {
+-
+-      outfile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" <<endl; 
+-      outfile << ""<<endl; 
+-
+-      outfile << "<dolfin xmlns:dolfin=\"http://www.phi.chalmers.se/dolfin/\">"<<endl;
+-      outfile << "  <mesh celltype=\"tetrahedron\" dim=\"3\">" <<endl; 
+-      outfile << "      <vertices size=\""<<np<<"\">"<<endl; 
+-      for (int i = 1; i <= np; i++) { 
+-        const Point3d & p = mesh.Point(i);
+-        outfile << "      <vertex index=\""<<i-1<<"\" x=\""<<p.X()<<"\" y=\""<<p.Y()<<"\" z=\""<<p.Z()<<"\"/>"<<endl; 
+-      }
+-      outfile << "      </vertices>"<<endl; 
+-
+-
+-
+-      outfile << "      <cells size=\""<<ne<<"\">"<<endl; 
+-      for (int i = 1; i <= ne; i++) {
+-        const Element & el = mesh.VolumeElement(i);
+-
+-        outfile << "      <tetrahedron index=\""<<i-1<<"\" v0=\""<<el.PNum(1)-1<<"\" v1=\""<<el.PNum(2)-1<<"\" v2=\""<<el.PNum(3)-1<<"\" v3=\""<<el.PNum(4)-1<<"\"/>"<<endl; 
+-      }
+-      outfile << "      </cells>"<<endl; 
++            outfile << "    <cells size=\""<<nse<<"\">\n"; 
++            for (int i = 1; i <= nse; i++) {
++                Element2d el = mesh.SurfaceElement(i);
++                if (mparam.inverttrigs) el.Invert();
++                ELEMENT_TYPE type = el.GetType();
++                if (type == TRIG || type == TRIG6)
++                    outfile << "      <triangle index=\""<<i-1<<"\" v0=\""<<el.PNum(1)-1<<"\" v1=\""<<el.PNum(2)-1<<"\" v2=\""<<el.PNum(3)-1<<"\"/>\n"; 
++                else if (type == QUAD || type == QUAD8)
++                    outfile << "      <quadilateral index=\""<<i-1<<"\" v0=\""<<el.PNum(1)-1<<"\" v1=\""<<el.PNum(2)-1<<"\" v2=\""<<el.PNum(3)-1<<"\" v3=\""<<el.PNum(4)-1<<"\"/>\n"; 
++                else
++                    cout << "Warning unsupported element." << endl;
++            }
++            outfile << "    </cells>\n";
++            outfile << "  </mesh>\n";
++            outfile << "</dolfin>";
++        }
++        outfile.close();
++        cout << "done writing dolfin export" << endl;
+     }
+-    outfile << "   </mesh>"<<endl; 
+-    outfile << "</dolfin>"<<endl; 
+-
+-    cout << "done writing dolfin export" << endl;
+-  }
+ }
+Index: writefeap.cpp
+===================================================================
+--- writefeap.cpp	(revision 159)
++++ writefeap.cpp	(working copy)
+@@ -6,17 +6,11 @@
+ // rieger@ibnm.uni-hannover.de
+ //
+ 
+-#include <mystdlib.h>
++#include "meshing.hpp"
+ 
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+ namespace netgen
+ {
+ 
+-#include "writeuser.hpp"
+ 
+ 
+ void WriteFEAPFormat (const Mesh & mesh,
+Index: writeabaqus.cpp
+===================================================================
+--- writeabaqus.cpp	(revision 159)
++++ writeabaqus.cpp	(working copy)
+@@ -3,235 +3,226 @@
+ //
+ //
+ 
+-#include <mystdlib.h>
++#include "meshing.hpp"
+ 
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+ 
++    void WriteAbaqusFormat (const Mesh & mesh,
++            const string & filename)
+ 
++    {
+ 
++        cout << "\nWrite Abaqus Volume Mesh" << endl;
+ 
+-void WriteAbaqusFormat (const Mesh & mesh,
+-			const string & filename)
++        ofstream outfile (filename.c_str());
+ 
+-{
+-      
+-  cout << "\nWrite Abaqus Volume Mesh" << endl;
++        outfile << "*Heading" << endl;
++        outfile << " " << filename << endl;
+ 
+-  ofstream outfile (filename.c_str());
++        outfile.precision(8);
+ 
+-  outfile << "*Heading" << endl;
+-  outfile << " " << filename << endl;
++        outfile << "*Node" << endl;
+ 
+-  outfile.precision(8);
++        int np = mesh.GetNP();
++        int ne = mesh.GetNE();
++        int i, j, k;
+ 
+-  outfile << "*Node" << endl;
++        for (i = 1; i <= np; i++)
++        {
++            outfile << i << ", ";
++            outfile << mesh.Point(i)(0) << ", ";
++            outfile << mesh.Point(i)(1) << ", ";
++            outfile << mesh.Point(i)(2) << "\n";
++        }
+ 
+-  int np = mesh.GetNP();
+-  int ne = mesh.GetNE();
+-  int i, j, k;
++        int elemcnt = 0; //element counter
++        int finished = 0;
++        int indcnt = 1; //index counter
+ 
+-  for (i = 1; i <= np; i++)
+-    {
+-      outfile << i << ", ";
+-      outfile << mesh.Point(i)(0) << ", ";
+-      outfile << mesh.Point(i)(1) << ", ";
+-      outfile << mesh.Point(i)(2) << "\n";
+-    }
++        while (!finished)
++        {
++            int actcnt = 0;
++            const Element & el1 = mesh.VolumeElement(1);
++            ELEMENT_TYPE type = el1.GetType();
++            if (type == TET)
++            {
++                outfile << "*Element, type=C3D4, ELSET=PART" << indcnt << endl;
++            } 
++            else if (type == TET10)
++            {
++                outfile << "*Element, type=C3D10, ELSET=PART" << indcnt << endl;
++            } 
++            else
++            {
++                cout << "unsupported Element type!!!" << endl;	  
++            }
+ 
+-  int elemcnt = 0; //element counter
+-  int finished = 0;
+-  int indcnt = 1; //index counter
++            for (i = 1; i <= ne; i++)
++            {
++                const Element & el = mesh.VolumeElement(i);
+ 
+-  while (!finished)
+-    {
+-      int actcnt = 0;
+-      const Element & el1 = mesh.VolumeElement(1);
+-      int non = el1.GetNP();
+-      if (non == 4)
+-	{
+-	  outfile << "*Element, type=C3D4, ELSET=PART" << indcnt << endl;
+-	} 
+-      else if (non == 10)
+-	{
+-	  outfile << "*Element, type=C3D10, ELSET=PART" << indcnt << endl;
+-	} 
+-      else
+-	{
+-	  cout << "unsupported Element type!!!" << endl;	  
+-	}
++                if (el.GetIndex() == indcnt)
++                {
++                    actcnt++;
++                    if (el.GetType() != type)
++                    {
++                        cout << "different element-types in a subdomain are not possible!!!" << endl;
++                        continue;
++                    }
+ 
+-      for (i = 1; i <= ne; i++)
+-	{
+-	  const Element & el = mesh.VolumeElement(i);
+-	      
+-	  if (el.GetIndex() == indcnt)
+-	    {
+-	      actcnt++;
+-	      if (el.GetNP() != non) 
+-		{
+-		  cout << "different element-types in a subdomain are not possible!!!" << endl;
+-		  continue;
+-		}
+-		  
+-	      elemcnt++;
+-	      outfile << elemcnt << ", ";
+-	      if (non == 4)
+-		{
+-		  outfile << el.PNum(1) << ", ";
+-		  outfile << el.PNum(2) << ", ";
+-		  outfile << el.PNum(4) << ", ";
+-		  outfile << el.PNum(3) << "\n";
+-		}
+-	      else if (non == 10)
+-		{
+-		  outfile << el.PNum(1) << ", ";
+-		  outfile << el.PNum(2) << ", ";
+-		  outfile << el.PNum(4) << ", ";
+-		  outfile << el.PNum(3) << ", ";
+-		  outfile << el.PNum(5) << ", ";
+-		  outfile << el.PNum(9) << ", ";
+-		  outfile << el.PNum(7) << ", " << "\n";
+-		  outfile << el.PNum(6) << ", ";
+-		  outfile << el.PNum(8) << ", ";
+-		  outfile << el.PNum(10) << "\n";
+-		}
+-	      else
+-		{
+-		  cout << "unsupported Element type!!!" << endl;
+-		  for (j = 1; j <= el.GetNP(); j++)
+-		    {
+-		      outfile << el.PNum(j);
+-		      if (j != el.GetNP()) outfile << ", ";
+-		    }
+-		  outfile << "\n";
+-		}
+-	    }
+-	}	  
+-      indcnt++;
+-      if (elemcnt == ne) {finished = 1; cout << "all elements found by Index!" << endl;}
+-      if (actcnt == 0) {finished = 1;}
+-    }
++                    elemcnt++;
++                    outfile << elemcnt << ", ";
++                    if (type == TET)
++                    {
++                        outfile << el.PNum(1) << ", ";
++                        outfile << el.PNum(2) << ", ";
++                        outfile << el.PNum(4) << ", ";
++                        outfile << el.PNum(3) << "\n";
++                    }
++                    else if (type == TET10)
++                    {
++                        outfile << el.PNum(1) << ", ";
++                        outfile << el.PNum(2) << ", ";
++                        outfile << el.PNum(4) << ", ";
++                        outfile << el.PNum(3) << ", ";
++                        outfile << el.PNum(5) << ", ";
++                        outfile << el.PNum(9) << ", ";
++                        outfile << el.PNum(7) << ", " << "\n";
++                        outfile << el.PNum(6) << ", ";
++                        outfile << el.PNum(8) << ", ";
++                        outfile << el.PNum(10) << "\n";
++                    }
++                    else
++                    {
++                        cout << "unsupported Element type!!!" << endl;
++                        for (j = 1; j <= el.GetNP(); j++)
++                        {
++                            outfile << el.PNum(j);
++                            if (j != el.GetNP()) outfile << ", ";
++                        }
++                        outfile << "\n";
++                    }
++                }
++            }	  
++            indcnt++;
++            if (elemcnt == ne) {finished = 1; cout << "all elements found by Index!" << endl;}
++            if (actcnt == 0) {finished = 1;}
++        }
+ 
+-  if (mesh.GetIdentifications().GetMaxNr())
+-    {
+-      // periodic identification, implementation for
+-      // Helmut J. Boehm, TU Vienna
+-	  
+-      char cfilename[255];
+-      strcpy (cfilename, filename.c_str());
++        if (mesh.GetIdentifications().GetMaxNr())
++        {
++            // periodic identification, implementation for
++            // Helmut J. Boehm, TU Vienna
+ 
+-      char mpcfilename[255];
+-      strcpy (mpcfilename, cfilename);
+-      size_t len = strlen (cfilename);
+-      if (len >= 4 && (strcmp (mpcfilename+len-4, ".inp") == 0))
+-	strcpy (mpcfilename+len-4, ".mpc");
+-      else
+-	strcat (mpcfilename, ".mpc");
+-	  
+-      ofstream mpc (mpcfilename);
++            char cfilename[255];
++            strcpy (cfilename, filename.c_str());
+ 
+-      int masternode(0);
++            char mpcfilename[255];
++            strcpy (mpcfilename, cfilename);
++            size_t len = strlen (cfilename);
++            if (len >= 4 && (strcmp (mpcfilename+len-4, ".inp") == 0))
++                strcpy (mpcfilename+len-4, ".mpc");
++            else
++                strcat (mpcfilename, ".mpc");
+ 
+-      Array<INDEX_2> pairs;
+-      BitArray master(np), help(np);
+-      master.Set();
+-      for (i = 1; i <= 3; i++)
+-	{
+-	  mesh.GetIdentifications().GetPairs (i, pairs);
+-	  help.Clear();
+-	  for (j = 1; j <= pairs.Size(); j++)
+-	    {
+-	      help.Set (pairs.Get(j).I1());
+-	    }
+-	  master.And (help);
+-	}
+-      for (i = 1; i <= np; i++)
+-	if (master.Test(i))
+-	  masternode = i;
++            ofstream mpc (mpcfilename);
+ 
+-      cout << "masternode = " << masternode << " = "
+-	   << mesh.Point(masternode) << endl;
+-      Array<int> slaves(3);
+-      for (i = 1; i <= 3; i++)
+-	{
+-	  mesh.GetIdentifications().GetPairs (i, pairs);
+-	  for (j = 1; j <= pairs.Size(); j++)
+-	    {
+-	      if (pairs.Get(j).I1() == masternode)
+-		slaves.Elem(i) = pairs.Get(j).I2();
+-	    }
+-	  cout << "slave(" << i << ") = " << slaves.Get(i)
+-	       << " = " << mesh.Point(slaves.Get(i)) << endl;
+-	}
+-	  
+-	  
+-      outfile << "**\n"
+-	      << "*NSET,NSET=CTENODS\n"
+-	      << slaves.Get(1) << ", " 
+-	      << slaves.Get(2) << ", " 
+-	      << slaves.Get(3) << endl;
++            int masternode(0);
+ 
+-	  
+-      outfile << "**\n"
+-	      << "**POINT_fixed\n"
+-	      << "**\n"
+-	      << "*BOUNDARY, OP=NEW\n";
+-      for (j = 1; j <= 3; j++)
+-	outfile << masternode << ", " << j << ",,    0.\n";
++            Array<INDEX_2> pairs;
++            BitArray master(np), help(np);
++            master.Set();
++            for (i = 1; i <= 3; i++)
++            {
++                mesh.GetIdentifications().GetPairs (i, pairs);
++                help.Clear();
++                for (j = 1; j <= pairs.Size(); j++)
++                {
++                    help.Set (pairs.Get(j).I1());
++                }
++                master.And (help);
++            }
++            for (i = 1; i <= np; i++)
++                if (master.Test(i))
++                    masternode = i;
+ 
+-      outfile << "**\n"
+-	      << "*BOUNDARY, OP=NEW\n";
+-      for (j = 1; j <= 3; j++)
+-	{
+-	  Vec3d v(mesh.Point(masternode), mesh.Point(slaves.Get(j)));
+-	  double vlen = v.Length();
+-	  int dir = 0;
+-	  if (fabs (v.X()) > 0.9 * vlen) dir = 2;
+-	  if (fabs (v.Y()) > 0.9 * vlen) dir = 3;
+-	  if (fabs (v.Z()) > 0.9 * vlen) dir = 1;
+-	  if (!dir)
+-	    cout << "ERROR: Problem with rigid body constraints" << endl;
+-	  outfile << slaves.Get(j) << ", " << dir << ",,    0.\n";
+-	}
++            cout << "masternode = " << masternode << " = "
++                << mesh.Point(masternode) << endl;
++            Array<int> slaves(3);
++            for (i = 1; i <= 3; i++)
++            {
++                mesh.GetIdentifications().GetPairs (i, pairs);
++                for (j = 1; j <= pairs.Size(); j++)
++                {
++                    if (pairs.Get(j).I1() == masternode)
++                        slaves.Elem(i) = pairs.Get(j).I2();
++                }
++                cout << "slave(" << i << ") = " << slaves.Get(i)
++                    << " = " << mesh.Point(slaves.Get(i)) << endl;
++            }
+ 
+-      outfile << "**\n"
+-	      << "*EQUATION, INPUT=" << mpcfilename << endl;
+-	  
+ 
+-      BitArray eliminated(np);
+-      eliminated.Clear();
+-      for (i = 1; i <= mesh.GetIdentifications().GetMaxNr(); i++)
+-	{
+-	  mesh.GetIdentifications().GetPairs (i, pairs);
+-	  if (!pairs.Size())
+-	    continue;
+-	      
+-	  for (j = 1; j <= pairs.Size(); j++)
+-	    if (pairs.Get(j).I1() != masternode && 
+-		!eliminated.Test(pairs.Get(j).I2()))
+-	      {
+-		eliminated.Set (pairs.Get(j).I2());
+-		for (k = 1; k <= 3; k++)
+-		  {
+-		    mpc << "4" << "\n";
+-		    mpc << pairs.Get(j).I2() << "," << k << ", -1.0, ";
+-		    mpc << pairs.Get(j).I1() << "," << k << ", 1.0, ";
+-		    mpc << slaves.Get(i) << "," << k << ", 1.0, ";
+-		    mpc << masternode << "," << k << ", -1.0 \n";
+-		  }
+-	      }
+-	}
+-    }
++            outfile << "**\n"
++                << "*NSET,NSET=CTENODS\n"
++                << slaves.Get(1) << ", " 
++                << slaves.Get(2) << ", " 
++                << slaves.Get(3) << endl;
+ 
+ 
+-  cout << "done" << endl;
+-}
++            outfile << "**\n"
++                << "**POINT_fixed\n"
++                << "**\n"
++                << "*BOUNDARY, OP=NEW\n";
++            for (j = 1; j <= 3; j++)
++                outfile << masternode << ", " << j << ",,    0.\n";
+ 
++            outfile << "**\n"
++                << "*BOUNDARY, OP=NEW\n";
++            for (j = 1; j <= 3; j++)
++            {
++                Vec3d v(mesh.Point(masternode), mesh.Point(slaves.Get(j)));
++                double vlen = v.Length();
++                int dir = 0;
++                if (fabs (v.X()) > 0.9 * vlen) dir = 2;
++                if (fabs (v.Y()) > 0.9 * vlen) dir = 3;
++                if (fabs (v.Z()) > 0.9 * vlen) dir = 1;
++                if (!dir)
++                    cout << "ERROR: Problem with rigid body constraints" << endl;
++                outfile << slaves.Get(j) << ", " << dir << ",,    0.\n";
++            }
++
++            outfile << "**\n"
++                << "*EQUATION, INPUT=" << mpcfilename << endl;
++
++
++            BitArray eliminated(np);
++            eliminated.Clear();
++            for (i = 1; i <= mesh.GetIdentifications().GetMaxNr(); i++)
++            {
++                mesh.GetIdentifications().GetPairs (i, pairs);
++                if (!pairs.Size())
++                    continue;
++
++                for (j = 1; j <= pairs.Size(); j++)
++                    if (pairs.Get(j).I1() != masternode && 
++                            !eliminated.Test(pairs.Get(j).I2()))
++                    {
++                        eliminated.Set (pairs.Get(j).I2());
++                        for (k = 1; k <= 3; k++)
++                        {
++                            mpc << "4" << "\n";
++                            mpc << pairs.Get(j).I2() << "," << k << ", -1.0, ";
++                            mpc << pairs.Get(j).I1() << "," << k << ", 1.0, ";
++                            mpc << slaves.Get(i) << "," << k << ", 1.0, ";
++                            mpc << masternode << "," << k << ", -1.0 \n";
++                        }
++                    }
++            }
++        }
++
++
++        cout << "done" << endl;
++    }
++
+ }
+Index: Makefile.am
+===================================================================
+--- Makefile.am	(revision 159)
++++ Makefile.am	(working copy)
+@@ -1,11 +1,10 @@
+-noinst_HEADERS = writeuser.hpp
++noinst_HEADERS = interface.hpp
+ 
+-AM_CPPFLAGS = -I$(top_srcdir)/libsrc/include -I$(top_srcdir)/libsrc/interface $(TCL_INCLUDES) -DOPENGL
++AM_CPPFLAGS = -I$(top_srcdir)/libsrc/include -I$(top_srcdir)/libsrc/interface
+ METASOURCES = AUTO
+ noinst_LTLIBRARIES = libinterface.la
+-libinterface_la_SOURCES = read_fnf_mesh.cpp readtetmesh.cpp readuser.cpp writeabaqus.cpp writediffpack.cpp \
++libinterface_la_SOURCES = readfnf.cpp readtet.cpp readuser.cpp writeabaqus.cpp writediffpack.cpp \
+ 	writedolfin.cpp writeelmer.cpp writefeap.cpp writefluent.cpp writegmsh.cpp writejcm.cpp \
+ 	writepermas.cpp writetecplot.cpp writetet.cpp writetochnog.cpp writeuser.cpp \
+-	wuchemnitz.cpp writegmsh2.cpp
++	writechemnitz.cpp writegmsh2.cpp writefepp.cpp writevrml.cpp writestl.cpp writevtu.cpp
+ 
+-
+Index: readtet.cpp
+===================================================================
+--- readtet.cpp	(revision 0)
++++ readtet.cpp	(revision 0)
+@@ -0,0 +1,786 @@
++
++//
++//  Read CST file format
++//
++
++#include "meshing.hpp"
++
++namespace netgen
++{
++
++  void ReadTETFormat (Mesh & mesh, 
++                      const string & hfilename)
++  {
++    const char * filename = hfilename.c_str();
++
++    cout << "Reading .tet mesh" << endl;
++
++    ifstream in (filename);
++
++    int inputsection = 0;
++    bool done = false;
++
++    char ch;
++    string str;
++
++    string version;
++
++    int unitcode;
++    double tolerance;
++    double dS1, dS2, alphaDeg, x3D, y3D, z3D;
++    int nelts,nfaces,nedges,nnodes;
++    int nperiodicmasternodes,ncornerperiodicmasternodes,ncubicperiodicmasternodes;
++    int nperiodicmasteredges,ncornerperiodicmasteredges;
++    int nperiodicmasterfaces;
++    int nodeid,type,pid;
++    int dummyint;
++    int modelverts,modeledges,modelfaces,modelcells;
++    Point3d p;
++    int numObj3D,numObj2D,numObj1D,numObj0D;
++    bool nullstarted;
++    Array<int> eldom;
++    int minId3D = -1, minId2D = -1;
++    int maxId3D(-1), maxId2D(-1), maxId1D(-1), maxId0D(-1);
++    Array<Array<int> *> segmentdata;
++    Array<Element2d* > tris;
++
++    Array<int> userdata_int;  // just save data for 1:1 output
++    Array<double> userdata_double;
++    Array<int> point_pids;
++    Array<int> tetfacedata;
++    Array<int> uid_to_group_3D, uid_to_group_2D, uid_to_group_1D, uid_to_group_0D;
++
++    while(!done)
++      {
++        // skip "//" comment
++        bool comment = true;
++        while(comment)
++          {
++            ch = in.get();
++            while(ch == ' ' || ch == '\n' || ch == '\t' || ch =='\r')
++              ch = in.get();
++	      
++            if(ch != '/')
++              {
++                comment = false;
++                in.putback(ch);
++              }
++            else
++              {
++                ch = in.get();
++                if(ch != '/')
++                  {
++                    comment = false;
++                    in.putback(ch);
++                    in.putback('/');
++                  }
++                else
++                  {
++                    in.ignore(10000,'\n');
++                  }
++              }
++          }
++
++	  
++        switch(inputsection)
++          {
++          case 0:
++            // version number
++            in >> version;
++            cout << "Version number " << version << endl;
++            if(version != "1.1" && version != "2" && version != "2.0")
++              {
++                cerr << "WARNING: import only tested for versions 1.1 and 2" << endl;
++                //done = true;
++              }
++            userdata_double.Append(atof(version.c_str()));
++            break;
++
++          case 1:
++            // unit code (1=CM 2=MM 3=M 4=MIC 5=NM 6=FT 7=IN 8=MIL)
++            in >> unitcode;
++            cout << "unit code " << unitcode << endl;
++            userdata_int.Append(unitcode);
++            break;
++
++          case 2:
++            // Geometric coord "zero" tolerance threshold
++            in >> tolerance;
++            cout << "tolerance " << tolerance << endl;
++            userdata_double.Append(tolerance);
++            break;
++
++          case 3:
++            // Periodic UnitCell dS1 , dS2 , alphaDeg
++            in >> dS1 >> dS2 >> alphaDeg;
++            userdata_double.Append(dS1);
++            userdata_double.Append(dS2);
++            userdata_double.Append(alphaDeg);
++            break;
++
++          case 4:
++            // Periodic UnitCell origin in global coords (x3D,y3D,z3D)
++            in >> x3D >> y3D >> z3D;
++            userdata_double.Append(x3D);
++            userdata_double.Append(y3D);
++            userdata_double.Append(z3D);
++            break;
++
++          case 5:
++            // Model entity count: Vertices, Edges, Faces, Cells (Version 2)
++            in >> modelverts >> modeledges >> modelfaces >> modelcells;
++            userdata_int.Append(modelverts);
++            userdata_int.Append(modeledges);
++            userdata_int.Append(modelfaces);
++            userdata_int.Append(modelcells);
++            break;
++
++          case 6:
++            // Topological mesh-entity counts (#elements,#faces,#edges,#nodes)
++            in >> nelts >> nfaces >> nedges >> nnodes;
++            cout << nelts << " elements, " << nfaces << " faces, " << nedges << " edges, " << nnodes << " nodes" << endl;
++            mesh.SetAllocSize(nnodes,2*nedges,nfaces,nelts);
++            break;
++
++          case 7:
++            // NodeID, X, Y, Z, Type (0=Reg 1=PMaster 2=PSlave 3=CPMaster 4=CPSlave), PID:
++            {
++              cout << "read nodes" << endl;
++              for(int i=0; i<nnodes; i++)
++                {
++                  in >> nodeid >> p.X() >> p.Y() >> p.Z() >> type >> pid;
++                  mesh.AddPoint(p);		  
++                  point_pids.Append(pid);
++                  if(pid > maxId0D)
++                    maxId0D = pid;
++                  //(*testout) << "point " << p << " type " << type << " mastersexist " << mastersexist << endl;
++                }
++            }
++            break;
++
++          case 8:
++            // Number of Periodic Master Nodes
++            in >> nperiodicmasternodes;
++            break;
++
++          case 9:
++            // MasterNodeID, SlaveNodeID, TranslCode (1=dS1 2=dS2 3=dS1+dS2)
++            for(int i=0; i<nperiodicmasternodes; i++)
++              {
++                for(int j=0; j<2; j++)
++                  in >> dummyint;
++
++                in >> dummyint;
++              }
++            break;
++
++          case 10:
++            // Number of Corner Periodic Master Nodes
++            in >> ncornerperiodicmasternodes;
++            break;
++
++          case 11:
++            // MasterNodeID, 3-SlaveNodeID's, 3-TranslCodes (1=dS1 2=dS2 3=dS1+dS2)
++            for(int i=0; i<ncornerperiodicmasternodes; i++)
++              {
++                for(int j=0; j<4; j++)
++                  in >> dummyint;
++
++                for(int j=0; j<3; j++)
++                  in >> dummyint;
++              }
++            break;
++
++          case 12:
++            // Number of Cubic Periodic Master Nodes
++            in >> ncubicperiodicmasternodes;
++            break;
++
++          case 13:
++            //MasterNodeID, 7-SlaveNodeID's, TranslCodes
++            for(int i=0; i<ncubicperiodicmasternodes; i++)
++              {
++                for(int j=0; j<8; j++)
++                  in >> dummyint;
++
++                for(int j=0; j<7; j++)
++                  in >> dummyint;
++              }
++            break;
++
++          case 14:
++            // EdgeID, NodeID0, NodeID1, Type (0=Reg 1=PMaster 2=PSlave 3=CPMaster 4=CPSlave), PID
++            cout << "read edges" << endl;
++            nullstarted = false;
++            segmentdata.SetSize(nedges);
++            for(int i=0; i<nedges; i++)
++              {
++                segmentdata[i] = new Array<int>(7);
++                *segmentdata[i] = -1;
++                in >> dummyint;
++                in >> (*segmentdata[i])[0] >> (*segmentdata[i])[1];
++                in >> type;
++                in >> (*segmentdata[i])[2];
++                if((*segmentdata[i])[2] > maxId1D)
++                  maxId1D = (*segmentdata[i])[2];
++              }
++            break;
++
++          case 15:
++            // Number of Periodic Master Edges
++            in >> nperiodicmasteredges;
++            break;
++
++          case 16:
++            // MasterEdgeID, SlaveEdgeID, TranslCode (1=dS1 2=dS2 3=dS1+dS2)
++            for(int i=0; i<nperiodicmasteredges; i++)
++              in >> dummyint >> dummyint >> dummyint;
++            break;
++
++          case 17:
++            // Number of Corner Periodic Master Edges
++            in >> ncornerperiodicmasteredges;
++            break;
++
++          case 18:
++            // MasterEdgeID, 3 SlaveEdgeID's, 3 TranslCode (1=dS1 2=dS2 3=dS1+dS2)
++            for(int i=0; i<ncornerperiodicmasteredges; i++)
++              {
++                in >> dummyint;
++                for(int j=0; j<3; j++)
++                  in >> dummyint;
++                for(int j=0; j<3; j++)
++                  in >> dummyint;
++              }
++            break;
++
++          case 19:
++            // FaceID, EdgeID0, EdgeID1, EdgeID2, FaceType (0=Reg 1=PMaster 2=PSlave), PID
++            {
++              //Segment seg;
++              int segnum_ng[3];
++              bool neg[3];
++              cout << "read faces" << endl;
++              nullstarted = false;
++              for(int i=0; i<nfaces; i++)
++                {
++                  int trinum;
++                  int segnum;
++		    
++                  tris.Append(new Element2d(TRIG));
++
++                  in >> trinum;
++                  for(int j=0; j<3; j++)
++                    {
++                      in >> segnum;
++                      neg[j] = (segnum<0);
++                      if(!neg[j])
++                        segnum_ng[j] = segnum-1;
++                      else
++                        segnum_ng[j] = -segnum-1;
++			
++                      if(neg[j])
++                        tris.Last()->PNum(j+1) = (*segmentdata[segnum_ng[j]])[1];
++                      else
++                        tris.Last()->PNum(j+1) = (*segmentdata[segnum_ng[j]])[0];
++
++                      tris.Last()->GeomInfoPi(j+1).trignum = trinum;
++                    }
++                  in >> type;
++                  int faceid;
++                  in >> faceid;
++		    
++                  if(faceid > maxId2D)
++                    maxId2D = faceid;
++
++                  if(i==0 || faceid < minId2D)
++                    minId2D = faceid;
++		    
++                  tris.Last()->SetIndex(faceid);
++
++                  if(faceid > 0)
++                    {
++                      //if(nullstarted)
++                      //  {
++                      //    cout << "Faces: Assumption about index 0 wrong (face"<<trinum <<")" << endl;
++                      //  }
++                      //mesh.AddSurfaceElement(tri);
++			
++                      for(int j=0; j<3; j++)
++                        {
++                          if(neg[j])
++                            {
++                              (*segmentdata[segnum_ng[j]])[4] = faceid;
++                              (*segmentdata[segnum_ng[j]])[6] = trinum;
++                            }
++                          else
++                            {
++                              (*segmentdata[segnum_ng[j]])[3] = faceid;
++                              (*segmentdata[segnum_ng[j]])[5] = trinum;
++                            }
++                        }
++                    }
++                  else
++                    nullstarted = true;
++                }
++            }
++            break;
++
++          case 20:
++            // Number of Periodic Master Faces
++            in >> nperiodicmasterfaces;
++            break;
++
++          case 21:
++            // MasterFaceID, SlaveFaceID, TranslCode (1=dS1 2=dS2)
++            {
++              Vec<3> randomvec(-1.32834,3.82399,0.5429151);
++              int maxtransl = -1;
++              for(int i=0; i<nperiodicmasterfaces; i++)
++                {
++                  int tri1,tri2,transl;
++                  Array<PointIndex> nodes1(3),nodes2(3);
++                  Array<double> sortval1(3),sortval2(3);
++                  in >> tri1 >> tri2 >> transl;
++
++                  if(transl > maxtransl)
++                    maxtransl = transl;
++		    
++		    
++                  for(int j=0; j<3; j++)
++                    {
++                      nodes1[j] = tris[tri1-1]->PNum(j+1);
++                      sortval1[j] = Vec<3>(mesh[nodes1[j]])*randomvec;
++                      nodes2[j] = tris[tri2-1]->PNum(j+1);
++                      sortval2[j] = Vec<3>(mesh[nodes2[j]])*randomvec;
++                    }
++
++                  BubbleSort(sortval1,nodes1);
++                  BubbleSort(sortval2,nodes2);
++
++                  for(int j=0; j<3; j++)
++                    mesh.GetIdentifications().Add(nodes1[j],nodes2[j],transl);
++			
++                }
++              for(int i=1; i<= maxtransl; i++)
++                mesh.GetIdentifications().SetType(i,Identifications::PERIODIC);
++            }	      
++            break;
++
++          case 22:
++            // ElemID, FaceID0, FaceID1, FaceID2, FaceID3, PID
++            {
++              cout << "read elements (1)" << endl;
++
++              //SurfaceElementIndex surf[4];
++              bool neg[4];
++              int elemid;
++              int domain;
++		
++              eldom.SetSize(nelts);
++
++              for(int i=0; i<nelts; i++)
++                {
++                  if(int(100.*i/nelts) % 5 == 0)
++                    cout << int(100.*i/nelts)
++#ifdef WIN32
++                         << "%%\r"
++#else
++                         << "\%\r"
++#endif 
++                         << flush;
++                  in >> elemid;
++                  for(int j=0; j<4;j++)
++                    {
++                      in >> dummyint;
++                      neg[j] = (dummyint < 0);
++                      if(neg[j])
++                        tetfacedata.Append(-dummyint-1);
++                      //surf[j] = -dummyint-1;
++                      else
++                        tetfacedata.Append(dummyint-1);
++                      tetfacedata.Append(((neg[j]) ? 1 : 0));
++                      //surf[j] = dummyint-1;
++                    }
++		    
++                  in >> domain;
++                  eldom[i] = domain;
++                  tetfacedata.Append(domain);
++
++                  if(i==0 || domain < minId3D)
++                    minId3D = domain;
++
++                  if(domain > maxId3D)
++                    maxId3D = domain;
++		    
++                  // 		    for(int j=0; j<4; j++)
++                  // 		      {
++                  // 			if(mesh.GetNSE() <= surf[j])
++                  // 			  continue;
++
++                  // 			int faceind = 0;
++                  // 			for(int k=1; k<=mesh.GetNFD(); k++)
++                  // 			  {
++                  // 			    if(mesh.GetFaceDescriptor(k).SurfNr() == mesh[surf[j]].GetIndex())
++                  // 			      faceind = k;
++                  // 			  }
++                  // 			if(faceind)
++                  // 			  {
++                  // 			    if(neg[j])
++                  // 			      mesh.GetFaceDescriptor(faceind).SetDomainOut(domain);
++                  // 			    else
++                  // 			      mesh.GetFaceDescriptor(faceind).SetDomainIn(domain);
++                  // 			  }
++                  // 			else
++                  // 			  {
++                  // 			    if(neg[j])
++                  // 			      faceind = mesh.AddFaceDescriptor(FaceDescriptor(mesh[surf[j]].GetIndex(),0,domain,0));
++                  // 			    else
++                  // 			      faceind = mesh.AddFaceDescriptor(FaceDescriptor(mesh[surf[j]].GetIndex(),domain,0,0));
++                  // 			    mesh.GetFaceDescriptor(faceind).SetBCProperty(mesh[surf[j]].GetIndex());
++                  // 			  }
++                  // 		      }
++                }
++              cout << endl;
++		
++		
++              // 		Array<int> indextodescriptor(maxId2D+1);
++		
++              // 		for(int i=1; i<=mesh.GetNFD(); i++)
++              // 		  indextodescriptor[mesh.GetFaceDescriptor(i).SurfNr()] = i;
++		
++		
++              // 		for(SurfaceElementIndex i=0; i<mesh.GetNSE(); i++)
++              // 		  mesh[i].SetIndex(indextodescriptor[mesh[i].GetIndex()]);
++            }
++            break;
++
++          case 23:
++            // ElemID, NodeID0, NodeID1, NodeID2, NodeID3
++            { 
++              cout << "read elements (2)" << endl;
++              Element el(TET);
++              for(ElementIndex i=0; i<nelts; i++)
++                {
++                  in >> dummyint;
++                  for(int j=1; j<=4; j++)
++                    in >> el.PNum(j);
++                  swap(el.PNum(1),el.PNum(2));
++		    
++                  el.SetIndex(eldom[i]);
++                  mesh.AddVolumeElement(el);
++                }	
++            }	  
++            break;
++	      
++          case 24:
++            // Physical Object counts (#Obj3D,#Obj2D,#Obj1D,#Obj0D)
++            {
++              in >> numObj3D;
++              userdata_int.Append(numObj3D);
++              in >> numObj2D;
++              userdata_int.Append(numObj2D);
++              in >> numObj1D;
++              userdata_int.Append(numObj1D);
++              in >> numObj0D;
++              userdata_int.Append(numObj0D);
++            }
++            break;
++
++          case 25:
++            // Number of Ports (Ports are a subset of Object2D list)
++            {
++              in >> dummyint;
++              //userdata_int.Append(dummyint);
++            }
++            break;
++
++          case 26:
++            // Object3D GroupID, #Elems <immediately followed by> ElemID List
++            {
++              uid_to_group_3D.SetSize(maxId3D+1);
++              uid_to_group_3D = -1;
++              for(int i=0; i<numObj3D; i++)
++                {
++                  int groupid;
++                  in >> groupid;
++                  (*testout) << "3d groupid " << groupid << endl;
++                  //userdata_int.Append(groupid);
++                  int nelems;
++                  in >> nelems;
++                  //userdata_int.Append(nelems);
++                  for(int j=0; j<nelems; j++)
++                    {
++                      in >> dummyint;
++			
++                      (*testout) << "read " << dummyint << endl;
++                      //userdata_int.Append(dummyint);
++			
++                      if(dummyint < 0) 
++                        dummyint *= -1;
++                      uid_to_group_3D[eldom[dummyint-1]] = groupid;
++                    }
++                }
++            }
++            break;
++
++          case 27:
++            // Object2D GroupID, #Faces <immediately followed by> FaceID List
++            {
++              Array<int> ports;
++              //int totnum = 0;
++              uid_to_group_2D.SetSize(maxId2D+1);
++              uid_to_group_2D = -1;
++
++              for(int i=0; i<numObj2D; i++)
++                {
++                  int groupid;
++                  in >> groupid;
++                  (*testout) << "2d groupid " << groupid << endl;
++                  //userdata_int.Append(groupid);
++                  int nelems;
++                  in >> nelems;
++                  //userdata_int.Append(nelems);
++                  for(int j=0; j<nelems; j++)
++                    {
++                      in >> dummyint;
++                      char port;
++                      while((port = in.get()) == ' ')
++                        ;
++
++                      (*testout) << "read " << dummyint << endl;
++                      if(dummyint < 0) 
++                        dummyint *= -1;
++                      int uid = tris[dummyint-1]->GetIndex();
++
++                      if(port == 'P' || port == 'p')
++                        {
++                          if(!ports.Contains(uid))
++                            ports.Append(uid);
++                        }
++                      else
++                        in.putback(port);
++			
++                      //userdata_int.Append(dummyint);
++			
++                      uid_to_group_2D[uid] = groupid;
++                      (*testout) << "setting " << uid << endl;
++
++                      //totnum++;
++                    }
++                }
++              mesh.SetUserData("TETmesh:ports",ports);
++            }
++            break;
++
++          case 28:
++            // Object1D GroupID, #Edges <immediately followed by> EdgeID List
++            {
++              uid_to_group_1D.SetSize(maxId1D+1);
++              uid_to_group_1D = -1;
++
++              for(int i=0; i<numObj1D; i++)
++                {
++                  int groupid;
++                  in >> groupid;
++                  //userdata_int.Append(groupid);
++                  int nelems;
++                  in >> nelems;
++                  //userdata_int.Append(nelems);
++                  for(int j=0; j<nelems; j++)
++                    {
++                      in >> dummyint;
++                      //userdata_int.Append(dummyint);
++
++                      if(dummyint < 0) 
++                        dummyint *= -1;
++                      uid_to_group_1D[(*segmentdata[dummyint-1])[2]] = groupid;
++                    }
++                }
++            }
++            break;
++
++          case 29:
++            // Object0D GroupID, #Nodes <immediately followed by> NodeID List
++            {
++              uid_to_group_0D.SetSize(maxId0D+1);
++              uid_to_group_0D = -1;
++              for(int i=0; i<numObj0D; i++)
++                {
++                  int groupid;
++                  in >> groupid;
++                  //userdata_int.Append(groupid);
++                  int nelems;
++                  in >> nelems;
++                  //userdata_int.Append(nelems);
++                  for(int j=0; j<nelems; j++)
++                    {
++                      in >> dummyint;
++                      //userdata_int.Append(dummyint);
++
++                      if(dummyint < 0) 
++                        dummyint *= -1;
++                      uid_to_group_0D[point_pids[dummyint-1]] = groupid;
++                    }
++                }
++            }
++            break;
++
++
++
++          default:
++            done = true;
++	      
++          }
++	  
++        if(inputsection == 4 && version == "1.1")
++          inputsection++;
++
++        inputsection++;
++      }
++    in.close();
++
++
++    mesh.SetUserData("TETmesh:double",userdata_double);
++    userdata_int.Append(minId2D);
++    userdata_int.Append(minId3D);
++    mesh.SetUserData("TETmesh:int",userdata_int);   
++    //if(version == "1.1")
++    mesh.SetUserData("TETmesh:point_id",point_pids);
++
++    mesh.SetUserData("TETmesh:uid_to_group_3D",uid_to_group_3D);
++    mesh.SetUserData("TETmesh:uid_to_group_2D",uid_to_group_2D);
++    mesh.SetUserData("TETmesh:uid_to_group_1D",uid_to_group_1D);
++    mesh.SetUserData("TETmesh:uid_to_group_0D",uid_to_group_0D);
++
++
++    Array<SurfaceElementIndex> surfindices(tris.Size());
++    surfindices = -1;
++
++    for(int i=0; i<tris.Size(); i++)
++      {
++        if(atof(version.c_str()) <= 1.999999)
++          {
++            if(tris[i]->GetIndex() > 0)
++              surfindices[i] = mesh.AddSurfaceElement(*tris[i]);
++          }
++        else
++          {
++            if(tris[i]->GetIndex() > 0 &&
++               tris[i]->GetIndex() < minId3D)
++              {
++                tris[i]->SetIndex(tris[i]->GetIndex()-minId2D+1);
++                surfindices[i] = mesh.AddSurfaceElement(*tris[i]);
++              }
++          }
++        delete tris[i];
++      }
++
++      
++    mesh.ClearFaceDescriptors();
++    if(atof(version.c_str()) <= 1.999999)
++      for(int i = 1; i <= maxId2D; i++)
++        mesh.AddFaceDescriptor(FaceDescriptor(i,0,0,0));
++    else
++      for(int i=minId2D; i<minId3D; i++)
++        mesh.AddFaceDescriptor(FaceDescriptor(i,0,0,0));
++	
++
++    for(int i=0; i<tetfacedata.Size(); i+=9)
++      {
++        for(int j=0; j<4; j++)
++          {
++            SurfaceElementIndex surf = surfindices[tetfacedata[i+2*j]];
++	      
++            //if(mesh.GetNSE() <= surf)
++            if(surf == -1)
++              continue;
++
++            if(tetfacedata[i+2*j+1] == 1)
++              mesh.GetFaceDescriptor(mesh[surf].GetIndex()).SetDomainOut(tetfacedata[i+8]);
++            else
++              mesh.GetFaceDescriptor(mesh[surf].GetIndex()).SetDomainIn(tetfacedata[i+8]);
++			
++
++            /*
++	      int faceind = 0;
++	      for(int k=1; k<=mesh.GetNFD(); k++)
++              {
++              if(mesh.GetFaceDescriptor(k).SurfNr() == mesh[surf].GetIndex())
++              faceind = k;
++              }
++	      if(faceind)
++              {
++              if(tetfacedata[i+4+j] == 1)
++              mesh.GetFaceDescriptor(faceind).SetDomainOut(tetfacedata[i+8]);
++              else
++              mesh.GetFaceDescriptor(faceind).SetDomainIn(tetfacedata[i+8]);
++              }
++	      else
++              {
++              if(tetfacedata[i+4+j] == 1)
++              faceind = mesh.AddFaceDescriptor(FaceDescriptor(mesh[surf].GetIndex(),0,tetfacedata[i+8],0));
++              else
++              faceind = mesh.AddFaceDescriptor(FaceDescriptor(mesh[surf].GetIndex(),tetfacedata[i+8],0,0));
++              mesh.GetFaceDescriptor(faceind).SetBCProperty(mesh[surf].GetIndex());
++              }
++            */
++          }
++
++      }
++      
++    //       Array<int> indextodescriptor(maxId2D+1);
++		
++    //       for(int i=1; i<=mesh.GetNFD(); i++)
++    // 	indextodescriptor[mesh.GetFaceDescriptor(i).SurfNr()] = i;
++		
++		
++    //       for(SurfaceElementIndex i=0; i<mesh.GetNSE(); i++)
++    // 	mesh[i].SetIndex(indextodescriptor[mesh[i].GetIndex()]);
++
++
++    for(int i=0; i<segmentdata.Size(); i++)
++      {
++        Segment seg;
++
++	  
++        if((atof(version.c_str()) <= 1.999999 && (*segmentdata[i])[2] > 0) ||
++           (atof(version.c_str()) > 1.999999  && (*segmentdata[i])[2] > 0 && (*segmentdata[i])[2] < minId2D))
++          {
++            seg[0] = (*segmentdata[i])[0];
++            seg[1] = (*segmentdata[i])[1];
++            seg.edgenr = (*segmentdata[i])[2];
++            seg.epgeominfo[0].edgenr = (*segmentdata[i])[2];
++            seg.epgeominfo[1].edgenr = (*segmentdata[i])[2];
++            seg.si = (*segmentdata[i])[3]-minId2D+1;
++            seg.surfnr1 = -1;//(*segmentdata[i])[3];
++            seg.surfnr2 = -1;//(*segmentdata[i])[4];
++            seg.geominfo[0].trignum = (*segmentdata[i])[5];
++            seg.geominfo[1].trignum = (*segmentdata[i])[5];
++            mesh.AddSegment(seg);
++
++            seg[0] = (*segmentdata[i])[1];
++            seg[1] = (*segmentdata[i])[0];
++            seg.si = (*segmentdata[i])[4]-minId2D+1;
++            seg.surfnr1 = -1;//(*segmentdata[i])[3];
++            seg.surfnr2 = -1;//(*segmentdata[i])[4];
++            seg.geominfo[0].trignum = (*segmentdata[i])[6];
++            seg.geominfo[1].trignum = (*segmentdata[i])[6];
++            mesh.AddSegment(seg);
++          }
++        delete segmentdata[i];
++      }
++
++    /*
++      for(int i=mesh.GetNSeg(); i>=1; i--)
++      if(mesh.LineSegment(i).epgeominfo[0].edgenr == 0 ||
++      mesh.LineSegment(i).epgeominfo[1].edgenr == 0)
++      mesh.FullDeleteSegment(i);
++    */	
++  
++    mesh.CalcSurfacesOfNode();
++      
++  }
++}
++
++
+Index: writeuser.cpp
+===================================================================
+--- writeuser.cpp	(revision 159)
++++ writeuser.cpp	(working copy)
+@@ -2,24 +2,19 @@
+ //  Write user dependent output file
+ //
+ 
+-#include <mystdlib.h>
++#include "meshing.hpp"
++#include "interface.hpp"
+ 
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <geometry2d.hpp>
+-#include <meshing.hpp>
+-
+ namespace netgen
+ {
+-#include "writeuser.hpp"
+ 
+-
+ void RegisterUserFormats (Array<const char*> & names)
+ {
+   const char *types[] =
+     {
+       "Neutral Format",
++      "VTU Format",
++      "VTU Format, only volume",
+       "Surface Mesh Format" ,
+       "DIFFPACK Format",
+       "TecPlot Format",
+@@ -33,9 +28,10 @@
+       "VRML Format",
+       "Gmsh Format",
+       "Gmsh2 Format",
++      "DOLFIN Format",
+       "JCMwave Format",
+       "TET Format",
+-      //      { "Chemnitz Format" },
++      "Chemnitz Format", // Why not? - Mikael
+       0
+     };
+ 
+@@ -54,13 +50,13 @@
+ 		", format is ", format);
+ 
+   if (format == "Neutral Format")
+-    WriteNeutralFormat (mesh, geom, filename);
++    WriteNeutralFormat (mesh, filename);
+ 
+   else if (format == "Surface Mesh Format")
+     WriteSurfaceFormat (mesh, filename);
+ 
+   else if (format == "DIFFPACK Format")
+-    WriteDiffPackFormat (mesh, geom, filename);
++    WriteDiffPackFormat (mesh, filename);
+ 
+   else if (format == "Tochnog Format")
+     WriteTochnogFormat (mesh, filename);
+@@ -94,31 +90,36 @@
+     WriteFEPPFormat (mesh, geom, filename);
+ 
+   else if (format ==  "EdgeElement Format")
+-    WriteEdgeElementFormat (mesh, geom, filename);
++    WriteEdgeElementFormat (mesh, filename);
+ 
+   else if (format == "Chemnitz Format")
+-    WriteUserChemnitz (mesh, filename);
++    WriteChemnitz (mesh, filename);
+ 
+   else if (format == "Gmsh Format")
+-    WriteGmshFormat (mesh, geom, filename);
++    WriteGmshFormat (mesh, filename);
+ 
+   // Philippose - 29/01/2009
+   // Added Gmsh v2.xx export capability
+   else if (format == "Gmsh2 Format")
+-    WriteGmsh2Format (mesh, geom, filename);
++    WriteGmsh2Format (mesh, filename);
+ 
++  else if (format == "VTU Format")
++    WriteVTUFormat (mesh, filename, false, false);
++
++  else if (format == "VTU Format, only volume")
++    WriteVTUFormat (mesh, filename, true, false);
++
++  else if (format == "DOLFIN Format")
++    WriteDolfinFormat (mesh, filename);
++
+   else if (format == "JCMwave Format")
+-    WriteJCMFormat (mesh, geom, filename);
++    WriteJCMFormat (mesh, filename);
+ 
+-#ifdef OLIVER
+   else if (format == "TET Format")
+     WriteTETFormat( mesh, filename);//, "High Frequency" );
+-#endif
+ 
+   else
+-    {
+       return 1;
+-    }
+ 
+   return 0;
+ }
+@@ -132,7 +133,6 @@
+  */
+ 
+ void WriteNeutralFormat (const Mesh & mesh,
+-			 const CSGeometry & geom,
+ 			 const string & filename)
+ {
+   cout << "write neutral, new" << endl;
+@@ -229,13 +229,6 @@
+ }
+ 
+ 
+-
+-
+-
+-
+-
+-
+-
+ void WriteSurfaceFormat (const Mesh & mesh,
+ 			 const string & filename)
+ {
+@@ -271,359 +264,12 @@
+ }
+ 
+ 
+-
+-
+-
+ /*
+- *  save surface mesh as STL file
+- */
+-
+-void WriteSTLFormat (const Mesh & mesh,
+-		     const string & filename)
+-{
+-  cout << "\nWrite STL Surface Mesh" << endl;
+-
+-  ofstream outfile (filename.c_str());
+-
+-  int i;
+-
+-  outfile.precision(10);
+-
+-  outfile << "solid" << endl;
+-
+-  for (i = 1; i <= mesh.GetNSE(); i++)
+-    {
+-      outfile << "facet normal ";
+-      const Point3d& p1 = mesh.Point(mesh.SurfaceElement(i).PNum(1));
+-      const Point3d& p2 = mesh.Point(mesh.SurfaceElement(i).PNum(2));
+-      const Point3d& p3 = mesh.Point(mesh.SurfaceElement(i).PNum(3));
+-
+-      Vec3d normal = Cross(p2-p1,p3-p1);
+-      if (normal.Length() != 0)
+-	{
+-	  normal /= (normal.Length());
+-	}
+-
+-      outfile << normal.X() << " " << normal.Y() << " " << normal.Z() << "\n";
+-      outfile << "outer loop\n";
+-
+-      outfile << "vertex " << p1.X() << " " << p1.Y() << " " << p1.Z() << "\n";
+-      outfile << "vertex " << p2.X() << " " << p2.Y() << " " << p2.Z() << "\n";
+-      outfile << "vertex " << p3.X() << " " << p3.Y() << " " << p3.Z() << "\n";
+-
+-      outfile << "endloop\n";
+-      outfile << "endfacet\n";
+-    }
+-  outfile << "endsolid" << endl;
+-}
+-
+-
+-
+-
+-
+-/*
+- *
+- *  write surface mesh as VRML file
+- *
+- */
+-
+-void WriteVRMLFormat (const Mesh & mesh,
+-		      bool faces,
+-		      const string & filename)
+-{
+-
+-  if (faces)
+-
+-    {
+-      // Output in VRML, IndexedFaceSet is used
+-      // Bartosz Sawicki <sawickib@ee.pw.edu.pl>
+-
+-      int np = mesh.GetNP();
+-      int nse = mesh.GetNSE();
+-      int i, j;
+-
+-      ofstream outfile (filename.c_str());
+-
+-      outfile.precision(6);
+-      outfile.setf (ios::fixed, ios::floatfield);
+-      outfile.setf (ios::showpoint);
+-
+-      outfile << "#VRML V2.0 utf8 \n"
+-	         "Background {\n"
+-		 "    skyColor [1 1 1]\n"
+-     		 "    groundColor [1 1 1]\n"
+-		 "}\n"
+-		 "Group{ children [\n"
+-		 "Shape{ \n"
+-		 "appearance Appearance { material Material { }} \n"
+-                 "geometry IndexedFaceSet { \n"
+-                 "coord Coordinate { point [ \n";
+-
+-
+-      for (i = 1; i <= np; i++)
+-        {
+-          const Point3d & p = mesh.Point(i);
+-          outfile.width(10);
+-          outfile << p.X() << " ";
+-          outfile << p.Y() << " ";
+-          outfile << p.Z() << " \n";
+-	}
+-
+-      outfile << "  ] } \n"
+-                 "coordIndex [ \n";
+-
+-      for (i = 1; i <= nse; i++)
+-	{
+-	  const Element2d & el = mesh.SurfaceElement(i);
+-
+-	  for (j = 1; j <= 3; j++)
+-	    {
+-	      outfile.width(8);
+-	      outfile << el.PNum(j)-1;
+-	    }
+-	  outfile << " -1 \n";
+-	}
+-
+-      outfile << "  ] \n";
+-
+-      //define number and RGB definitions of colors
+-      outfile << "color Color { color [1 0 0, 0 1 0, 0 0 1, 1 1 0]} \n"
+-                 "colorIndex [\n";
+-
+-      for (i = 1; i <= nse; i++)
+-	{
+-	  outfile << mesh.GetFaceDescriptor(mesh.SurfaceElement(i).GetIndex ()).BCProperty();
+-          outfile << endl;
+-	}
+-
+-      outfile << " ] \n"
+-                 "colorPerVertex FALSE \n"
+-                 "creaseAngle 0 \n"
+-		 "solid FALSE \n"
+-                 "ccw FALSE \n"
+-		 "convex TRUE \n"
+-                 "} } # end of Shape\n"
+-		 "] }\n";
+-
+-    } /* end of VRMLFACES */
+-
+-
+-  else
+-
+-    {
+-        // Output in VRML, IndexedLineSet is used
+-	// Bartosz Sawicki <sawickib@ee.pw.edu.pl>
+-
+-      int np = mesh.GetNP();
+-      int nse = mesh.GetNSE();
+-      int i, j;
+-
+-      ofstream outfile (filename.c_str());
+-
+-      outfile.precision(6);
+-      outfile.setf (ios::fixed, ios::floatfield);
+-      outfile.setf (ios::showpoint);
+-
+-      outfile << "#VRML V2.0 utf8 \n"
+-	         "Background {\n"
+-		 "    skyColor [1 1 1]\n"
+-     		 "    groundColor [1 1 1]\n"
+-		 "}\n"
+-		 "Group{ children [\n"
+-	         "Shape{ \n"
+-		 "appearance Appearance { material Material { }} \n"
+-                 "geometry IndexedLineSet { \n"
+-                 "coord Coordinate { point [ \n";
+-
+-
+-      for (i = 1; i <= np; i++)
+-        {
+-          const Point3d & p = mesh.Point(i);
+-          outfile.width(10);
+-          outfile << p.X() << " ";
+-          outfile << p.Y() << " ";
+-          outfile << p.Z() << " \n";
+-	}
+-
+-      outfile << "  ] } \n"
+-                 "coordIndex [ \n";
+-
+-      for (i = 1; i <= nse; i++)
+-	{
+-	  const Element2d & el = mesh.SurfaceElement(i);
+-
+-	  for (j = 1; j <= 3; j++)
+-	    {
+-	      outfile.width(8);
+-	      outfile << el.PNum(j)-1;
+-	    }
+-	  outfile.width(8);
+-	  outfile << el.PNum(1)-1;
+-	  outfile << " -1 \n";
+-	}
+-
+-      outfile << "  ] \n";
+-
+-/* Uncomment if you want color mesh
+-      outfile << "color Color { color [1 1 1, 0 1 0, 0 0 1, 1 1 0]} \n"
+-                 "colorIndex [\n";
+-
+-      for (i = 1; i <= nse; i++)
+-	{
+-	  outfile << mesh.GetFaceDescriptor(mesh.SurfaceElement(i).GetIndex ()).BCProperty();
+-          outfile << endl;
+-	}
+-
+-      outfile << " ] \n"
+-*/
+-      outfile << "colorPerVertex FALSE \n"
+-                 "} } #end of Shape\n"
+-		 "] } \n";
+-
+-    }
+-
+-}
+-
+-
+-
+-
+-
+-
+-/*
+- * FEPP .. a finite element package developed at University Linz, Austria
+- */
+-void WriteFEPPFormat (const Mesh & mesh,
+-		      const CSGeometry & geom,
+-		      const string & filename)
+-{
+-
+-  ofstream outfile (filename.c_str());
+-
+-  if (mesh.GetDimension() == 3)
+-
+-    {
+-
+-      // output for FEPP
+-
+-      int np = mesh.GetNP();
+-      int ne = mesh.GetNE();
+-      int nse = mesh.GetNSE();
+-      int ns = mesh.GetNFD();
+-      int i, j;
+-
+-      outfile.precision(5);
+-      outfile.setf (ios::fixed, ios::floatfield);
+-      outfile.setf (ios::showpoint);
+-
+-      outfile << "volumemesh4" << endl;
+-      outfile << nse << endl;
+-      for (i = 1; i <= nse; i++)
+-	{
+-	  const Element2d & el = mesh.SurfaceElement(i);
+-
+-	  //	  int facenr = mesh.facedecoding.Get(el.GetIndex()).surfnr;
+-	  outfile.width(4);
+-	  outfile << el.GetIndex() << " ";
+-	  outfile.width(4);
+-	  //	  outfile << mesh.GetFaceDescriptor(el.GetIndex()).BCProperty() << " ";
+-	  outfile << mesh.GetFaceDescriptor(el.GetIndex()).BCProperty() << " ";
+-	  outfile.width(4);
+-	  outfile << el.GetNP() << "    ";
+-	  for (j = 1; j <= el.GetNP(); j++)
+-	    {
+-	      outfile.width(8);
+-	      outfile << el.PNum(j);
+-	    }
+-	  outfile << "\n";
+-	}
+-
+-
+-      outfile << ne << "\n";
+-      for (i = 1; i <= ne; i++)
+-	{
+-	  const Element & el = mesh.VolumeElement(i);
+-	  outfile.width(4);
+-	  outfile << el.GetIndex() << " ";
+-	  outfile.width(4);
+-	  outfile << el.GetNP() << " ";
+-	  for (j = 1; j <= el.GetNP(); j++)
+-	    {
+-	      outfile.width(8);
+-	      outfile << el.PNum(j);
+-	    }
+-	  outfile << "\n";
+-	}
+-
+-      outfile << np << "\n";
+-      for (i = 1; i <= np; i++)
+-	{
+-	  const Point3d & p = mesh.Point(i);
+-
+-	  outfile.width(10);
+-	  outfile << p.X() << " ";
+-	  outfile.width(9);
+-	  outfile << p.Y() << " ";
+-	  outfile.width(9);
+-	  outfile << p.Z() << "\n";
+-	}
+-
+-      /*
+-      if (typ == WRITE_FEPPML)
+-	{
+-	  int nbn =  mesh.mlbetweennodes.Size();
+-	  outfile << nbn << "\n";
+-	  for (i = 1; i <= nbn; i++)
+-	    outfile << mesh.mlbetweennodes.Get(i).I1() << " "
+-		    << mesh.mlbetweennodes.Get(i).I2() << "\n";
+-
+-
+-	  //	  int ncon = mesh.connectedtonode.Size();
+-	  //	  outfile << ncon << "\n";
+-	  //	  for (i = 1; i <= ncon; i++)
+-	  //	    outfile << i << " " << mesh.connectedtonode.Get(i) << endl;
+-	}
+-      */
+-
+-
+-      // write CSG surfaces
+-      if (&geom && geom.GetNSurf() >= ns)
+-	{
+-	  outfile << ns << endl;
+-	  for (i = 1; i <= ns; i++)
+-	    geom.GetSurface(mesh.GetFaceDescriptor(i).SurfNr())->Print(outfile);
+-	}
+-      else
+-	outfile << "0" << endl;
+-    }
+-
+-
+-  else
+-
+-    { // 2D fepp format
+-
+-      ;
+-      /*
+-      extern SplineGeometry2d * geometry2d;
+-      if (geometry2d)
+-	Save2DMesh (mesh, &geometry2d->GetSplines(), outfile);
+-      else
+-	Save2DMesh (mesh, 0, outfile);
+-      */
+-    }
+-}
+-
+-
+-
+-
+-
+-
+-/*
+  *  Edge element mesh format
+  *  points, elements, edges
+  */
+ 
+ void WriteEdgeElementFormat (const Mesh & mesh,
+-			     const CSGeometry & geom,
+ 			     const string & filename)
+ {
+   cout << "write edge element format" << endl;
+Index: writevtu.cpp
+===================================================================
+--- writevtu.cpp	(revision 0)
++++ writevtu.cpp	(revision 0)
+@@ -0,0 +1,225 @@
++/** \file writevtu.cpp
++  * \author Mikael Öhman <mikael.ohman@chalmers.se>
++  * \date 2009-06-17
++  * \brief Write unstructured mesh (VTK format)
++  * Handles all surface and volume elements except QUAD6 and PRISM12.
++  * No segments (but it is possible and easy to add).
++  * PointType, BCProperty, DomainIn, DomainOut, SurfNr are saved but no user data.
++  */
++
++#include "meshing.hpp"
++
++namespace netgen
++{
++
++enum VTK_ELEMENTS {VTK_VERTEX=1,VTK_POLY_VERTEX,VTK_LINE,VTK_POLY_LINE,VTK_TRIANGLE,VTK_TRIANGLE_STRIP,
++    VTK_POLYGON,VTK_PIXEL,VTK_QUAD,VTK_TETRA,VTK_VOXEL,VTK_HEXAHEDRON,VTK_WEDGE,VTK_PYRAMID,
++    VTK_QUADRATIC_EDGE=21,VTK_QUADRATIC_TRIANGLE,VTK_QUADRATIC_QUAD,VTK_QUADRATIC_TETRA,VTK_QUADRATIC_HEXAHEDRON};
++
++// Some reordering (netgen starts numbering from 0)
++static int orderTri[6] = {1,2,3,6,4,5};
++static int orderQuad[8] = {1,2,3,4,5,8,6,7};
++static int orderTetra[10] = {1,3,2,4,6,8,5,7,10,9};
++// These i dont know the order of, and i can't seem to generate any, but for now;
++static int orderWedge[6] = {1,2,3,4,5,6};
++static int orderPyramid[5] = {1,2,3,4,5};
++static int orderHexahedron[8] = {1,2,3,4,5,6,7,8};
++
++// Number of nodes per element. -1 for undefined elements and element strips 
++// (those will intentionally cause errors in the vtu file, as they should never occur).
++static int vtkOffset[26] = {
++    0,1,-1,2,
++    -1,3,-1,
++    -1,4,4,
++    4,8,8,
++    6,5,
++    -1,-1,-1,-1,-1,-1,
++    3,6,8,
++    10,20};
++
++bool WriteVTUFormat (const Mesh & mesh, const string & filename, bool noSurf=false, bool noVol=false)
++{
++    cout << "Write VTU mesh" << endl;
++    bool warnVolume = true;
++    bool warnSurface = true;
++    int np = mesh.GetNP();
++    int ne = noVol ? 0 : mesh.GetNE();
++    int nse = noSurf ? 0 : mesh.GetNSE();
++    //int ns = noSeg ? 0 : mesh.GetNSeg();
++    int *elType = NULL;
++    int *sElType = NULL;
++    if (ne > 0) elType = new int[ne];
++    if (nse > 0) sElType = new int[nse];
++
++    ofstream outfile(filename.c_str());
++    outfile.precision(10);
++    cout << "Writing points" << endl;
++    outfile << "<?xml version=\"1.0\"?>\n";
++    outfile << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
++    outfile << "  <UnstructuredGrid>\n";
++    outfile << "    <Piece NumberOfPoints=\"" << np << "\" NumberOfCells=\"" << (nse+ne) << "\">\n";
++    outfile << "      <Points>\n";
++    outfile << "        <DataArray type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\">\n";
++
++    for (int i = 0; i < np; i++)
++    {
++        const Point3d& p = mesh.Point(i+1);
++        outfile << p.X() << " " << p.Y() << " " << p.Z() << "\n";
++    }
++    outfile << "        </DataArray>\n";
++    outfile << "      </Points>\n";
++    cout << "Writing cells" << endl;
++    outfile << "      <Cells>\n";
++    outfile << "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
++    for (int i = 0; i < ne; i++) // write the volume elements, except for type (seperate node in the xml document)
++    {
++        int *order;
++        elType[i] = 0;
++        Element e = mesh.VolumeElement(i+1);
++        if (mparam.inverttets) e.Invert();
++        switch (e.GetType())
++        {
++            case TET:
++                elType[i] = VTK_TETRA;
++                order = orderTetra;
++                break;
++            case TET10:
++                elType[i] = VTK_QUADRATIC_TETRA;
++                order = orderTri;
++                break;
++            case PYRAMID:
++                elType[i] = VTK_PYRAMID;
++                order = orderPyramid;
++                break;
++            case PRISM:
++                elType[i] = VTK_WEDGE;
++                order = orderWedge;
++                break;
++            case HEX:
++                elType[i] = VTK_HEXAHEDRON;
++                order = orderHexahedron;
++                break;
++            default:
++                if (warnVolume)
++                {
++                    cout << "Invalid element type " << e.GetType() << " for the VTU format." << endl;
++                    warnVolume = false;
++                    continue;
++                }
++        }
++        for (int j = 0; j < e.GetNP(); j++)
++            outfile << (e.PNum(order[j])-1) << " "; // subtract one since node number starts at 1 in netgen.
++        outfile << "\n";
++    }
++    for (int i = 0; i < nse; i++) // and the same for the surface elements
++    {
++        int *order;
++        sElType[i] = 0;
++        Element2d e = mesh.SurfaceElement(i+1);
++        if (mparam.inverttrigs) e.Invert();
++        switch (e.GetType())
++        {
++            case TRIG:
++                sElType[i] = VTK_TRIANGLE;
++                order = orderTri;
++                break;
++            case TRIG6:
++                sElType[i] = VTK_QUADRATIC_TRIANGLE;
++                order = orderTri;
++                break;
++            case QUAD:
++                sElType[i] = VTK_QUAD;
++                order = orderQuad;
++                break;
++            case QUAD8:
++                sElType[i] = VTK_QUADRATIC_QUAD;
++                order = orderQuad;
++                break;
++            default:
++                if (warnSurface)
++                {
++                    cout << "Invalid element type " << e.GetType() << " for the VTU format." << endl;
++                    warnSurface = false;
++                    continue;
++                }
++        }
++        for (int j = 0; j < e.GetNP(); j++)
++            outfile << (e.PNum(order[j])-1) << " ";
++        outfile << "\n";
++    }
++
++    outfile << "        </DataArray>\n";
++    outfile << "        <DataArray type=\"Int32\" Name=\"types\" format=\"ascii\">\n";
++    for (int i = 0; i < ne; i++) outfile << elType[i] << " ";
++    for (int i = 0; i < nse; i++) outfile << sElType[i] << " ";
++    outfile << "\n";
++    outfile << "        </DataArray>\n";
++    outfile << "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
++    int offset = 0;
++    for (int i = 0; i < ne; i++) 
++    {
++        offset += vtkOffset[elType[i]];
++        outfile << offset << " ";
++    }
++    for (int i = 0; i < nse; i++) 
++    {
++        offset += vtkOffset[sElType[i]];
++        outfile << offset << " ";
++    }
++    outfile << "\n";
++    outfile << "        </DataArray>\n";
++    outfile << "      </Cells>\n";
++    cout << "Writing cell data" << endl;
++    outfile << "      <CellData>\n";
++    /////////////////////// SurfNr ////////////////////////
++    outfile << "        <DataArray type=\"Int32\" Name=\"SurfNr\" format=\"ascii\">\n";
++    for (int i = 0; i < ne; i++) 
++        outfile << mesh.GetFaceDescriptor(mesh.VolumeElement(i+1).GetIndex()).SurfNr() << " ";
++    for (int i = 0; i < nse; i++) 
++        outfile << mesh.GetFaceDescriptor(mesh.SurfaceElement(i+1).GetIndex()).SurfNr() << " ";
++    outfile << "\n"; 
++    outfile << "        </DataArray>\n";
++    /////////////////////// BCProperty ////////////////////////
++    outfile << "        <DataArray type=\"Int32\" Name=\"BCProperty\" format=\"ascii\">\n";
++    for (int i = 0; i < ne; i++) 
++        outfile << mesh.GetFaceDescriptor(mesh.VolumeElement(i+1).GetIndex()).BCProperty() << " ";
++    for (int i = 0; i < nse; i++) 
++        outfile << mesh.GetFaceDescriptor(mesh.SurfaceElement(i+1).GetIndex()).BCProperty() << " ";
++    outfile << "\n"; 
++    outfile << "        </DataArray>\n";
++    /////////////////////// DomainIn ////////////////////////
++    outfile << "        <DataArray type=\"Int32\" Name=\"DomainIn\" format=\"ascii\">\n";
++    for (int i = 0; i < ne; i++) 
++        outfile << mesh.GetFaceDescriptor(mesh.VolumeElement(i+1).GetIndex()).DomainIn() << " ";
++    for (int i = 0; i < nse; i++) 
++        outfile << mesh.GetFaceDescriptor(mesh.SurfaceElement(i+1).GetIndex()).DomainIn() << " ";
++    outfile << "\n";
++    outfile << "        </DataArray>\n";
++    /////////////////////// DomainOut ////////////////////////
++    outfile << "        <DataArray type=\"Int32\" Name=\"DomainOut\" format=\"ascii\">\n";
++    for (int i = 0; i < ne; i++) 
++        outfile << mesh.GetFaceDescriptor(mesh.VolumeElement(i+1).GetIndex()).DomainOut() << " ";
++    for (int i = 0; i < nse; i++) 
++        outfile << mesh.GetFaceDescriptor(mesh.SurfaceElement(i+1).GetIndex()).DomainOut() << " ";
++    outfile << "\n"; 
++    outfile << "        </DataArray>\n";
++    outfile << "      </CellData>\n";
++    cout << "Writing point data" << endl;
++    outfile << "      <PointData>\n";
++    outfile << "        <DataArray type=\"Int32\" Name=\"PointType\" format=\"ascii\">\n";
++    for (int i = 0; i < np; i++)
++        outfile << mesh.Point(i+1).Type() << " ";
++    outfile << "\n";
++    outfile << "        </DataArray>\n";
++    outfile << "      </PointData>\n";
++    outfile << "    </Piece>\n";
++    outfile << "  </UnstructuredGrid>\n";
++    outfile << "</VTKFile>";
++    outfile.close();
++    cout << "Done writing file." << endl;
++    if (elType) delete(elType);
++    if (sElType) delete(sElType);
++    return true;
++}
++
++}
+Index: writegmsh2.cpp
+===================================================================
+--- writegmsh2.cpp	(revision 159)
++++ writegmsh2.cpp	(working copy)
+@@ -1,261 +1,253 @@
+-/*! \file writegmsh2.cpp
+- *  \brief Export Netgen Mesh in the GMSH v2.xx File format
+- *  \author Philippose Rajan
+- *  \date 02 November 2008
+- *
+- *  This function extends the export capabilities of
+- *  Netgen to include the GMSH v2.xx File Format.
+- *
+- *  Current features of this function include:
+- *
+- *  1. Exports Triangles, Quadrangles and Tetrahedra \n
+- *  2. Supports upto second order elements of each type
++/*! \file writegmsh2.cpp
++ *  \brief Export Netgen Mesh in the GMSH v2.xx File format
++ *  \author Philippose Rajan
++ *  \date 02 November 2008
+  *
+- */
+-
+-
+-#include <mystdlib.h>
+-
+-#include <myadt.hpp>
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+-namespace netgen
+-{
+-#include "writeuser.hpp"
+-
+-// Mapping of entities from Netgen definitions to GMSH definitions
+-enum GMSH_ELEMENTS {GMSH_TRIG = 2, GMSH_TRIG6 = 9,
+-                    GMSH_QUAD = 3, GMSH_QUAD8 = 16,
+-					GMSH_TET = 4, GMSH_TET10 = 11};
+-const int triGmsh[7] = {0,1,2,3,6,4,5};
+-const int quadGmsh[9] = {0,1,2,3,4,5,8,6,7};
+-const int tetGmsh[11] = {0,1,2,3,4,5,8,6,7,10,9};
+-
+-
+-/*! GMSH v2.xx mesh format export function
+- *
+- *  This function extends the export capabilities of
+- *  Netgen to include the GMSH v2.xx File Format.
+- *
+- *  Current features of this function include:
+- *
+- *  1. Exports Triangles, Quadrangles and Tetrahedra \n
+- *  2. Supports upto second order elements of each type
+- *
+- */
+-void WriteGmsh2Format (const Mesh & mesh,
+-			           const CSGeometry & geom,
+-			           const string & filename)
+-{
+-  ofstream outfile (filename.c_str());
+-  outfile.precision(6);
+-  outfile.setf (ios::fixed, ios::floatfield);
+-  outfile.setf (ios::showpoint);
+-
+-  int np = mesh.GetNP();  /// number of points in mesh
+-  int ne = mesh.GetNE();  /// number of 3D elements in mesh
+-  int nse = mesh.GetNSE();  /// number of surface elements (BC)
+-  int i, j, k, l;
+-
+-
+-  /*
+-   * 3D section : Volume elements (currently only tetrahedra)
+-   */
+-
+-  if ((ne > 0)
+-	  && (mesh.VolumeElement(1).GetNP() <= 10)
+-	  && (mesh.SurfaceElement(1).GetNP() <= 6))
+-  {
+-    cout << "Write GMSH v2.xx Format \n";
+-    cout << "The GMSH v2.xx export is currently available for elements upto 2nd Order\n" << endl;
+-
+-    int inverttets = mparam.inverttets;
+-    int invertsurf = mparam.inverttrigs;
+-
+-	/// Prepare GMSH 2.0 file (See GMSH 2.0 Documentation)
+-	outfile << "$MeshFormat\n";
+-	outfile << (float)2.0 << " "
+-	        << (int)0 << " "
+-	        << (int)sizeof(double) << "\n";
+-    outfile << "$EndMeshFormat\n";
+-
+-    /// Write nodes
+-    outfile << "$Nodes\n";
+-    outfile << np << "\n";
+-
+-    for (i = 1; i <= np; i++)
+-    {
+-      const Point3d & p = mesh.Point(i);
+-      outfile << i << " "; /// node number
+-      outfile << p.X() << " ";
+-      outfile << p.Y() << " ";
+-      outfile << p.Z() << "\n";
+-    }
+-
+-	outfile << "$EndNodes\n";
+-
+-	/// write elements (both, surface elements and volume elements)
+-    outfile << "$Elements\n";
+-    outfile << ne + nse << "\n";  ////  number of elements + number of surfaces BC
+-
+-    for (i = 1; i <= nse; i++)
+-    {
+-	  int elType = 0;
+-
+-	  Element2d el = mesh.SurfaceElement(i);
+-      if(invertsurf) el.Invert();
+-
+-	  if(el.GetNP() == 3) elType = GMSH_TRIG;	//// GMSH Type for a 3 node triangle
+-	  if(el.GetNP() == 6) elType = GMSH_TRIG6;  //// GMSH Type for a 6 node triangle
+-	  if(elType == 0)
+-	  {
+-	    cout << " Invalid surface element type for Gmsh 2.0 3D-Mesh Export Format !\n";
+-		return;
+-	  }
+-
+-	  outfile << i;
+-      outfile << " ";
+-      outfile << elType;
+-      outfile << " ";
+-	  outfile << "2";                  //// Number of tags (2 => Physical and elementary entities)
+-	  outfile << " ";
+-      outfile << mesh.GetFaceDescriptor (el.GetIndex()).BCProperty() << " ";
+-      /// that means that physical entity = elementary entity (arbitrary approach)
+-      outfile << mesh.GetFaceDescriptor (el.GetIndex()).BCProperty() << " ";
+-      for (j = 1; j <= el.GetNP(); j++)
+-      {
+-        outfile << " ";
+-        outfile << el.PNum(triGmsh[j]);
+-      }
+-      outfile << "\n";
+-    }
+-
+-
+-    for (i = 1; i <= ne; i++)
+-    {
+-      int elType = 0;
+-
+-	  Element el = mesh.VolumeElement(i);
+-      if (inverttets) el.Invert();
+-
+-	  if(el.GetNP() == 4) elType = GMSH_TET;    //// GMSH Element type for 4 node tetrahedron
+-	  if(el.GetNP() == 10) elType = GMSH_TET10; //// GMSH Element type for 10 node tetrahedron
+-	  if(elType == 0)
+-	  {
+-	    cout << " Invalid volume element type for Gmsh 2.0 3D-Mesh Export Format !\n";
+-		return;
+-	  }
+-
+-      outfile << nse + i;                       //// element number (Remember to add on surface elements)
+-      outfile << " ";
+-      outfile << elType;
+-      outfile << " ";
+-	  outfile << "2";                   //// Number of tags (2 => Physical and elementary entities)
+-	  outfile << " ";
+-      outfile << 100000 + el.GetIndex();
+-      /// that means that physical entity = elementary entity (arbitrary approach)
+-      outfile << " ";
+-      outfile << 100000 + el.GetIndex();   /// volume number
+-      outfile << " ";
+-      for (j = 1; j <= el.GetNP(); j++)
+-      {
+-        outfile << " ";
+-        outfile << el.PNum(tetGmsh[j]);
+-      }
+-      outfile << "\n";
+-    }
+-    outfile << "$EndElements\n";
+-  }
+-  /*
+-   * End of 3D section
+-   */
+-
+-
+-  /*
+-   * 2D section : available for triangles and quadrangles
+-   *              upto 2nd Order
+-   */
+-  else if(ne == 0)   /// means that there's no 3D element
+-  {
+-    cout << "\n Write Gmsh v2.xx Surface Mesh (triangle and/or quadrangles upto 2nd Order)" << endl;
+-
+-	/// Prepare GMSH 2.0 file (See GMSH 2.0 Documentation)
+-	outfile << "$MeshFormat\n";
+-	outfile << (float)2.0 << " "
+-	        << (int)0 << " "
+-	        << (int)sizeof(double) << "\n";
+-    outfile << "$EndMeshFormat\n";
+-
+-	/// Write nodes
+-    outfile << "$Nodes\n";
+-    outfile << np << "\n";
+-
+-    for (i = 1; i <= np; i++)
+-    {
+-      const Point3d & p = mesh.Point(i);
+-      outfile << i << " "; /// node number
+-      outfile << p.X() << " ";
+-      outfile << p.Y() << " ";
+-      outfile << p.Z() << "\n";
+-    }
+-    outfile << "$EndNodes\n";
+-
+-    /// write triangles & quadrangles
+-    outfile << "$Elements\n";
+-    outfile << nse << "\n";
+-
+-    for (k = 1; k <= nse; k++)
+-    {
+-      int elType = 0;
+-
+-      const Element2d & el = mesh.SurfaceElement(k);
+-
+-	  if(el.GetNP() == 3) elType = GMSH_TRIG;   //// GMSH Type for a 3 node triangle
+-	  if(el.GetNP() == 6) elType = GMSH_TRIG6;  //// GMSH Type for a 6 node triangle
+-      if(el.GetNP() == 4) elType = GMSH_QUAD;   //// GMSH Type for a 4 node quadrangle
+-      if(el.GetNP() == 8) elType = GMSH_QUAD8;  //// GMSH Type for an 8 node quadrangle
+-	  if(elType == 0)
+-	  {
+-	    cout << " Invalid surface element type for Gmsh 2.0 2D-Mesh Export Format !\n";
+-		return;
+-	  }
+-
+-	  outfile << k;
+-      outfile << " ";
+-      outfile << elType;
+-      outfile << " ";
+-	  outfile << "2";
+-	  outfile << " ";
+-      outfile << mesh.GetFaceDescriptor (el.GetIndex()).BCProperty() << " ";
+-      /// that means that physical entity = elementary entity (arbitrary approach)
+-      outfile << mesh.GetFaceDescriptor (el.GetIndex()).BCProperty() << " ";
+-      for (l = 1; l <= el.GetNP(); l++)
+-      {
+-        outfile << " ";
+-		if((elType == GMSH_TRIG) || (elType == GMSH_TRIG6))
+-		{
+-		  outfile << el.PNum(triGmsh[l]);
+-		}
+-		else if((elType == GMSH_QUAD) || (elType == GMSH_QUAD8))
+-		{
+-	      outfile << el.PNum(quadGmsh[l]);
+-		}
+-      }
+-      outfile << "\n";
+-    }
+-    outfile << "$EndElements\n";
+-  }
+-  /*
+-   * End of 2D section
+-   */
+-
+-  else
+-  {
+-    cout << " Invalid element type for Gmsh v2.xx Export Format !\n";
+-  }
+-} // End: WriteGmsh2Format
+-} // End: namespace netgen
+-
+-
++ *  This function extends the export capabilities of
++ *  Netgen to include the GMSH v2.xx File Format.
++ *
++ *  Current features of this function include:
++ *
++ *  1. Exports Triangles, Quadrangles and Tetrahedra \n
++ *  2. Supports upto second order elements of each type
++ *
++ */
++
++#include "meshing.hpp"
++
++namespace netgen
++{
++
++// Mapping of entities from Netgen definitions to GMSH definitions
++enum GMSH_ELEMENTS {GMSH_TRIG = 2, GMSH_TRIG6 = 9,
++                    GMSH_QUAD = 3, GMSH_QUAD8 = 16,
++					GMSH_TET = 4, GMSH_TET10 = 11};
++const int triGmsh[7] = {0,1,2,3,6,4,5};
++const int quadGmsh[9] = {0,1,2,3,4,5,8,6,7};
++const int tetGmsh[11] = {0,1,2,3,4,5,8,6,7,10,9};
++
++
++/*! GMSH v2.xx mesh format export function
++ *
++ *  This function extends the export capabilities of
++ *  Netgen to include the GMSH v2.xx File Format.
++ *
++ *  Current features of this function include:
++ *
++ *  1. Exports Triangles, Quadrangles and Tetrahedra \n
++ *  2. Supports upto second order elements of each type
++ *
++ */
++void WriteGmsh2Format (const Mesh & mesh,
++			           const string & filename)
++{
++  ofstream outfile (filename.c_str());
++  outfile.precision(6);
++  outfile.setf (ios::fixed, ios::floatfield);
++  outfile.setf (ios::showpoint);
++
++  int np = mesh.GetNP();  /// number of points in mesh
++  int ne = mesh.GetNE();  /// number of 3D elements in mesh
++  int nse = mesh.GetNSE();  /// number of surface elements (BC)
++  int i, j, k, l;
++
++
++  /*
++   * 3D section : Volume elements (currently only tetrahedra)
++   */
++
++  if ((ne > 0)
++	  && (mesh.VolumeElement(1).GetNP() <= 10)
++	  && (mesh.SurfaceElement(1).GetNP() <= 6))
++  {
++    cout << "Write GMSH v2.xx Format \n";
++    cout << "The GMSH v2.xx export is currently available for elements upto 2nd Order\n" << endl;
++
++    int inverttets = mparam.inverttets;
++    int invertsurf = mparam.inverttrigs;
++
++	/// Prepare GMSH 2.0 file (See GMSH 2.0 Documentation)
++	outfile << "$MeshFormat\n";
++	outfile << (float)2.0 << " "
++	        << (int)0 << " "
++	        << (int)sizeof(double) << "\n";
++    outfile << "$EndMeshFormat\n";
++
++    /// Write nodes
++    outfile << "$Nodes\n";
++    outfile << np << "\n";
++
++    for (i = 1; i <= np; i++)
++    {
++      const Point3d & p = mesh.Point(i);
++      outfile << i << " "; /// node number
++      outfile << p.X() << " ";
++      outfile << p.Y() << " ";
++      outfile << p.Z() << "\n";
++    }
++
++	outfile << "$EndNodes\n";
++
++	/// write elements (both, surface elements and volume elements)
++    outfile << "$Elements\n";
++    outfile << ne + nse << "\n";  ////  number of elements + number of surfaces BC
++
++    for (i = 1; i <= nse; i++)
++    {
++	  int elType = 0;
++
++	  Element2d el = mesh.SurfaceElement(i);
++      if(invertsurf) el.Invert();
++
++	  if(el.GetNP() == 3) elType = GMSH_TRIG;	//// GMSH Type for a 3 node triangle
++	  if(el.GetNP() == 6) elType = GMSH_TRIG6;  //// GMSH Type for a 6 node triangle
++	  if(elType == 0)
++	  {
++	    cout << " Invalid surface element type for Gmsh 2.0 3D-Mesh Export Format !\n";
++		return;
++	  }
++
++	  outfile << i;
++      outfile << " ";
++      outfile << elType;
++      outfile << " ";
++	  outfile << "2";                  //// Number of tags (2 => Physical and elementary entities)
++	  outfile << " ";
++      outfile << mesh.GetFaceDescriptor (el.GetIndex()).BCProperty() << " ";
++      /// that means that physical entity = elementary entity (arbitrary approach)
++      outfile << mesh.GetFaceDescriptor (el.GetIndex()).BCProperty() << " ";
++      for (j = 1; j <= el.GetNP(); j++)
++      {
++        outfile << " ";
++        outfile << el.PNum(triGmsh[j]);
++      }
++      outfile << "\n";
++    }
++
++
++    for (i = 1; i <= ne; i++)
++    {
++      int elType = 0;
++
++	  Element el = mesh.VolumeElement(i);
++      if (inverttets) el.Invert();
++
++	  if(el.GetNP() == 4) elType = GMSH_TET;    //// GMSH Element type for 4 node tetrahedron
++	  if(el.GetNP() == 10) elType = GMSH_TET10; //// GMSH Element type for 10 node tetrahedron
++	  if(elType == 0)
++	  {
++	    cout << " Invalid volume element type for Gmsh 2.0 3D-Mesh Export Format !\n";
++		return;
++	  }
++
++      outfile << nse + i;                       //// element number (Remember to add on surface elements)
++      outfile << " ";
++      outfile << elType;
++      outfile << " ";
++	  outfile << "2";                   //// Number of tags (2 => Physical and elementary entities)
++	  outfile << " ";
++      outfile << 100000 + el.GetIndex();
++      /// that means that physical entity = elementary entity (arbitrary approach)
++      outfile << " ";
++      outfile << 100000 + el.GetIndex();   /// volume number
++      outfile << " ";
++      for (j = 1; j <= el.GetNP(); j++)
++      {
++        outfile << " ";
++        outfile << el.PNum(tetGmsh[j]);
++      }
++      outfile << "\n";
++    }
++    outfile << "$EndElements\n";
++  }
++  /*
++   * End of 3D section
++   */
++
++
++  /*
++   * 2D section : available for triangles and quadrangles
++   *              upto 2nd Order
++   */
++  else if(ne == 0)   /// means that there's no 3D element
++  {
++    cout << "\n Write Gmsh v2.xx Surface Mesh (triangle and/or quadrangles upto 2nd Order)" << endl;
++
++	/// Prepare GMSH 2.0 file (See GMSH 2.0 Documentation)
++	outfile << "$MeshFormat\n";
++	outfile << (float)2.0 << " "
++	        << (int)0 << " "
++	        << (int)sizeof(double) << "\n";
++    outfile << "$EndMeshFormat\n";
++
++	/// Write nodes
++    outfile << "$Nodes\n";
++    outfile << np << "\n";
++
++    for (i = 1; i <= np; i++)
++    {
++      const Point3d & p = mesh.Point(i);
++      outfile << i << " "; /// node number
++      outfile << p.X() << " ";
++      outfile << p.Y() << " ";
++      outfile << p.Z() << "\n";
++    }
++    outfile << "$EndNodes\n";
++
++    /// write triangles & quadrangles
++    outfile << "$Elements\n";
++    outfile << nse << "\n";
++
++    for (k = 1; k <= nse; k++)
++    {
++      int elType = 0;
++
++      const Element2d & el = mesh.SurfaceElement(k);
++
++	  if(el.GetNP() == 3) elType = GMSH_TRIG;   //// GMSH Type for a 3 node triangle
++	  if(el.GetNP() == 6) elType = GMSH_TRIG6;  //// GMSH Type for a 6 node triangle
++      if(el.GetNP() == 4) elType = GMSH_QUAD;   //// GMSH Type for a 4 node quadrangle
++      if(el.GetNP() == 8) elType = GMSH_QUAD8;  //// GMSH Type for an 8 node quadrangle
++	  if(elType == 0)
++	  {
++	    cout << " Invalid surface element type for Gmsh 2.0 2D-Mesh Export Format !\n";
++		return;
++	  }
++
++	  outfile << k;
++      outfile << " ";
++      outfile << elType;
++      outfile << " ";
++	  outfile << "2";
++	  outfile << " ";
++      outfile << mesh.GetFaceDescriptor (el.GetIndex()).BCProperty() << " ";
++      /// that means that physical entity = elementary entity (arbitrary approach)
++      outfile << mesh.GetFaceDescriptor (el.GetIndex()).BCProperty() << " ";
++      for (l = 1; l <= el.GetNP(); l++)
++      {
++        outfile << " ";
++		if((elType == GMSH_TRIG) || (elType == GMSH_TRIG6))
++		{
++		  outfile << el.PNum(triGmsh[l]);
++		}
++		else if((elType == GMSH_QUAD) || (elType == GMSH_QUAD8))
++		{
++	      outfile << el.PNum(quadGmsh[l]);
++		}
++      }
++      outfile << "\n";
++    }
++    outfile << "$EndElements\n";
++  }
++  /*
++   * End of 2D section
++   */
++
++  else
++  {
++    cout << " Invalid element type for Gmsh v2.xx Export Format !\n";
++  }
++} // End: WriteGmsh2Format
++} // End: namespace netgen
++
++
+Index: writevrml.cpp
+===================================================================
+--- writevrml.cpp	(revision 0)
++++ writevrml.cpp	(revision 0)
+@@ -0,0 +1,114 @@
++/*
++ *  write surface mesh as VRML file
++ */
++// Bartosz Sawicki <sawickib@ee.pw.edu.pl>
++
++#include "meshing.hpp"
++
++namespace netgen
++{
++
++void WriteVRMLFormat (const Mesh & mesh,
++        bool faces,
++        const string & filename)
++{
++    int np = mesh.GetNP();
++    int nse = mesh.GetNSE();
++    int i, j;
++
++    ofstream outfile (filename.c_str());
++    outfile.precision(6);
++    outfile.setf (ios::fixed, ios::floatfield);
++    outfile.setf (ios::showpoint);
++
++    if (faces)
++    {
++        // IndexedFaceSet is used
++        outfile << "#VRML V2.0 utf8 \n"
++            "Background {\n"
++            "    skyColor [1 1 1]\n"
++            "    groundColor [1 1 1]\n"
++            "}\n"
++            "Group{ children [\n"
++            "Shape{ \n"
++            "appearance Appearance { material Material { }} \n"
++            "geometry IndexedFaceSet { \n"
++            "coord Coordinate { point [ \n";
++    }
++    else
++    {
++        // IndexedLineSet is used
++        outfile << "#VRML V2.0 utf8 \n"
++            "Background {\n"
++            "    skyColor [1 1 1]\n"
++            "    groundColor [1 1 1]\n"
++            "}\n"
++            "Group{ children [\n"
++            "Shape{ \n"
++            "appearance Appearance { material Material { }} \n"
++            "geometry IndexedLineSet { \n"
++            "coord Coordinate { point [ \n";
++    }
++
++    for (i = 1; i <= np; i++)
++    {
++        const Point3d & p = mesh.Point(i);
++        outfile.width(10);
++        outfile << p.X() << " ";
++        outfile << p.Y() << " ";
++        outfile << p.Z() << " \n";
++    }
++
++    outfile << "  ] } \n"
++        "coordIndex [ \n";
++
++    for (i = 1; i <= nse; i++)
++    {
++        const Element2d & el = mesh.SurfaceElement(i);
++
++        for (j = 1; j <= 3; j++)
++        {
++            outfile.width(8);
++            outfile << el.PNum(j)-1;
++        }
++        if (faces) 
++        {   
++            outfile.width(8);
++            outfile << el.PNum(1)-1;
++        }
++        outfile << " -1 \n";
++    }
++
++    outfile << "  ] \n";
++
++    if (faces)
++    {
++        //define number and RGB definitions of colors
++        outfile << "color Color { color [1 0 0, 0 1 0, 0 0 1, 1 1 0]} \n"
++            "colorIndex [\n";
++
++        for (i = 1; i <= nse; i++)
++        {
++            outfile << mesh.GetFaceDescriptor(mesh.SurfaceElement(i).GetIndex ()).BCProperty();
++            outfile << endl;
++        }
++
++        outfile << " ] \n"
++            "colorPerVertex FALSE \n"
++            "creaseAngle 0 \n"
++            "solid FALSE \n"
++            "ccw FALSE \n"
++            "convex TRUE \n"
++            "} } # end of Shape\n"
++            "] }\n";
++    }
++    else
++    {
++        outfile << "colorPerVertex FALSE \n"
++            "} } #end of Shape\n"
++            "] } \n";
++    }
++
++}
++
++}
+Index: writechemnitz.cpp
+===================================================================
+--- writechemnitz.cpp	(revision 0)
++++ writechemnitz.cpp	(revision 0)
+@@ -0,0 +1,310 @@
++// Write Chemnitz file format
++
++#include "meshing.hpp"
++
++namespace netgen
++{
++
++  class POINT3D
++  {
++  public:
++    POINT3D () { };
++    double x, y, z;
++  };
++
++  class VOLELEMENT
++  {
++  public:
++    int domnr, p1, p2, p3, p4;
++    int faces[4];
++
++    VOLELEMENT () 
++    { for (int i = 0; i < 4; i++) faces[i] = 0; }
++  };
++  
++  class SURFELEMENT
++  {
++  public:
++    SURFELEMENT () { };
++    int snr, p1, p2, p3;
++  };
++  
++
++  class FACE
++  {
++  public:
++    int p1, p2, p3;
++    int edges[3];
++
++    FACE () 
++    { for (int i = 0; i < 3; i++) edges[i] = 0; }
++  };
++
++  class EDGE
++  {
++  public:
++    EDGE () { };
++    int p1, p2;
++  };
++
++  static Array<POINT3D> points;
++  static Array<VOLELEMENT> volelements;
++  static Array<SURFELEMENT> surfelements;
++
++  static Array<FACE> faces;
++  static Array<EDGE> edges;
++
++
++  void ReadFile (char * filename)
++  {
++    int i, n;
++    ifstream infile(filename);
++    char reco[100];
++  
++  
++    infile >> reco;  // file format recognition
++  
++    infile >> n;   // number of surface elements
++    cout << n << " Surface elements" << endl;
++  
++    for (i = 1; i <= n; i++)
++      {
++        SURFELEMENT sel;
++        infile >> sel.snr >> sel.p1 >> sel.p2 >> sel.p3;
++        surfelements.Append (sel);
++      }
++    
++    infile >> n;   // number of volume elements
++    cout << n << " Volume elements" << endl;
++  
++    for (i = 1; i <= n; i++)
++      {
++        VOLELEMENT el;
++        infile >> el.p1 >> el.p2 >> el.p3 >> el.p4;
++        volelements.Append (el);
++      }
++    
++    infile >> n;   // number of points 
++    cout << n << " Points" << endl;
++  
++    for (i = 1; i <= n; i++)
++      {
++        POINT3D p;
++        infile >> p.x >> p.y >> p.z;
++        points.Append (p);
++      }
++  }
++  
++  
++
++  void ReadFileMesh (const Mesh & mesh)
++  {
++    int i, n;
++  
++    n = mesh.GetNSE();   // number of surface elements
++    cout << n << " Surface elements" << endl;
++  
++    for (i = 1; i <= n; i++)
++      {
++        SURFELEMENT sel;
++        const Element2d & el = mesh.SurfaceElement(i);
++        sel.snr = el.GetIndex();
++        sel.p1 = el.PNum(1);
++        sel.p2 = el.PNum(2);
++        sel.p3 = el.PNum(3);
++        surfelements.Append (sel);
++      }
++    
++    n = mesh.GetNE();   // number of volume elements
++    cout << n << " Volume elements" << endl;
++  
++    for (i = 1; i <= n; i++)
++      {
++        VOLELEMENT el;
++        const Element & nel = mesh.VolumeElement(i);
++        el.p1 = nel.PNum(1);
++        el.p2 = nel.PNum(2);
++        el.p3 = nel.PNum(3);
++        el.p4 = nel.PNum(4);
++        //      infile >> el.p1 >> el.p2 >> el.p3 >> el.p4;
++        volelements.Append (el);
++      }
++    
++    n = mesh.GetNP();   // number of points 
++    cout << n << " Points" << endl;
++  
++    for (i = 1; i <= n; i++)
++      {
++        POINT3D p;
++        Point3d mp = mesh.Point(i);
++        p.x = mp.X();
++        p.y = mp.Y();
++        p.z = mp.Z();
++        //      infile >> p.x >> p.y >> p.z;
++        points.Append (p);
++      }
++  }
++  
++
++
++
++  void Convert ()
++  {
++    int i, j, facei, edgei;
++    INDEX_3 i3;
++    INDEX_2 i2;
++
++    INDEX_3_HASHTABLE<int> faceindex(volelements.Size()/5 + 1);
++    INDEX_2_HASHTABLE<int> edgeindex(volelements.Size()/5 + 1);
++  
++    for (i = 1; i <= volelements.Size(); i++)
++      {
++        for (j = 1; j <= 4; j++)
++          {
++            switch (j)
++              {
++              case 1:
++                i3.I1() = volelements.Get(i).p2;
++                i3.I2() = volelements.Get(i).p3;
++                i3.I3() = volelements.Get(i).p4;
++                break;
++              case 2:
++                i3.I1() = volelements.Get(i).p1;
++                i3.I2() = volelements.Get(i).p3;
++                i3.I3() = volelements.Get(i).p4;
++                break;
++              case 3:
++                i3.I1() = volelements.Get(i).p1;
++                i3.I2() = volelements.Get(i).p2;
++                i3.I3() = volelements.Get(i).p4;
++                break;
++              case 4:
++                i3.I1() = volelements.Get(i).p1;
++                i3.I2() = volelements.Get(i).p2;
++                i3.I3() = volelements.Get(i).p3;
++                break;
++              default:
++                i3.I1()=i3.I2()=i3.I3()=0;
++              }
++            i3.Sort();
++            if (faceindex.Used (i3)) 
++              facei = faceindex.Get(i3);
++            else
++              {
++                FACE fa;
++                fa.p1 = i3.I1();
++                fa.p2 = i3.I2();
++                fa.p3 = i3.I3();
++                facei = faces.Append (fa);
++                faceindex.Set (i3, facei);
++              } 
++        
++            volelements.Elem(i).faces[j-1] = facei;  
++          }    
++    
++      } 
++ 
++
++    for (i = 1; i <= faces.Size(); i++)
++      {
++        for (j = 1; j <= 3; j++)
++          {
++            switch (j)
++              {
++              case 1:
++                i2.I1() = faces.Get(i).p2;
++                i2.I2() = faces.Get(i).p3;
++                break;
++              case 2:
++                i2.I1() = faces.Get(i).p1;
++                i2.I2() = faces.Get(i).p3;
++                break;
++              case 3:
++                i2.I1() = faces.Get(i).p1;
++                i2.I2() = faces.Get(i).p2;
++                break;
++              default:
++                i2.I1()=i2.I2()=0;
++              }
++            if (i2.I1() > i2.I2()) swap (i2.I1(), i2.I2());
++            if (edgeindex.Used (i2)) 
++              edgei = edgeindex.Get(i2);
++            else
++              {
++                EDGE ed;
++                ed.p1 = i2.I1();
++                ed.p2 = i2.I2();
++                edgei = edges.Append (ed);
++                edgeindex.Set (i2, edgei);
++              } 
++        
++            faces.Elem(i).edges[j-1] = edgei;  
++          }    
++    
++      }  
++ 
++  }  
++  
++  
++  void WriteFile (ostream & outfile)
++  {
++    int i;
++  
++    outfile 
++      << "#VERSION: 1.0" << endl
++      << "#PROGRAM: NETGEN" << endl
++      << "#EQN_TYPE: POISSON" << endl
++      << "#DIMENSION: 3D" << endl
++      << "#DEG_OF_FREE: 1" << endl
++      << "#DESCRIPTION: I don't know" << endl
++      << "##RENUM: not done" << endl
++      << "#USER: Kleinzen" << endl
++      << "DATE: 10.06.1996" << endl;
++  
++    outfile << "#HEADER:   8" << endl
++            << points.Size() << "  " << edges.Size() << "  " 
++            << faces.Size() << "  " << volelements.Size() << "  0  0  0  0" << endl;
++  
++    outfile << "#VERTEX:   " << points.Size() << endl;
++    for (i = 1; i <= points.Size(); i++)
++      outfile << "  " << i << "  " << points.Get(i).x << "  " << points.Get(i).y 
++              << "  " << points.Get(i).z << endl;
++    	
++    outfile << "#EDGE:  " << edges.Size() << endl;
++    for (i = 1; i <= edges.Size(); i++)
++      outfile << "  " << i << "  1  " 
++              << edges.Get(i).p1 << "  " 
++              << edges.Get(i).p2 
++              << "  0" << endl;
++    
++    outfile << "#FACE:  " << faces.Size() << endl;  
++    for (i = 1; i <= faces.Size(); i++)
++      outfile << "  " << i << "  1  3  " 
++              << faces.Get(i).edges[0] << "  " 
++              << faces.Get(i).edges[1] << "  " 
++              << faces.Get(i).edges[2] << endl;
++    	
++    outfile << "#SOLID:  " << volelements.Size() << endl;
++    for (i = 1; i <= volelements.Size(); i++)
++      outfile << "  " << i << "  1  4  " 
++              << volelements.Get(i).faces[0] << "  "
++              << volelements.Get(i).faces[1] << "  "
++              << volelements.Get(i).faces[2] << "  "
++              << volelements.Get(i).faces[3] << endl;
++    	
++    outfile << "#END_OF_DATA" << endl;
++  }
++    
++
++  void WriteChemnitz (const Mesh & mesh,
++                      const string & filename)
++  {
++    ofstream outfile (filename.c_str());
++
++    ReadFileMesh (mesh);
++    Convert ();
++  
++    WriteFile (outfile);
++    cout << "Wrote Chemnitz standard file" << endl;
++  }
++}
+Index: wuchemnitz.cpp
+===================================================================
+--- wuchemnitz.cpp	(revision 159)
++++ wuchemnitz.cpp	(working copy)
+@@ -1,317 +0,0 @@
+-// Write Chemnitz file format
+-
+-
+-#include <mystdlib.h>
+-
+-#include <myadt.hpp>
+-
+-#include <linalg.hpp>
+-#include <csg.hpp>
+-#include <meshing.hpp>
+-
+-namespace netgen
+-{
+-
+-  class POINT3D
+-  {
+-  public:
+-    POINT3D () { };
+-    double x, y, z;
+-  };
+-
+-  class VOLELEMENT
+-  {
+-  public:
+-    int domnr, p1, p2, p3, p4;
+-    int faces[4];
+-
+-    VOLELEMENT () 
+-    { for (int i = 0; i < 4; i++) faces[i] = 0; }
+-  };
+-  
+-  class SURFELEMENT
+-  {
+-  public:
+-    SURFELEMENT () { };
+-    int snr, p1, p2, p3;
+-  };
+-  
+-
+-  class FACE
+-  {
+-  public:
+-    int p1, p2, p3;
+-    int edges[3];
+-
+-    FACE () 
+-    { for (int i = 0; i < 3; i++) edges[i] = 0; }
+-  };
+-
+-  class EDGE
+-  {
+-  public:
+-    EDGE () { };
+-    int p1, p2;
+-  };
+-
+-  static Array<POINT3D> points;
+-  static Array<VOLELEMENT> volelements;
+-  static Array<SURFELEMENT> surfelements;
+-
+-  static Array<FACE> faces;
+-  static Array<EDGE> edges;
+-
+-
+-  void ReadFile (char * filename)
+-  {
+-    int i, n;
+-    ifstream infile(filename);
+-    char reco[100];
+-  
+-  
+-    infile >> reco;  // file format recognition
+-  
+-    infile >> n;   // number of surface elements
+-    cout << n << " Surface elements" << endl;
+-  
+-    for (i = 1; i <= n; i++)
+-      {
+-        SURFELEMENT sel;
+-        infile >> sel.snr >> sel.p1 >> sel.p2 >> sel.p3;
+-        surfelements.Append (sel);
+-      }
+-    
+-    infile >> n;   // number of volume elements
+-    cout << n << " Volume elements" << endl;
+-  
+-    for (i = 1; i <= n; i++)
+-      {
+-        VOLELEMENT el;
+-        infile >> el.p1 >> el.p2 >> el.p3 >> el.p4;
+-        volelements.Append (el);
+-      }
+-    
+-    infile >> n;   // number of points 
+-    cout << n << " Points" << endl;
+-  
+-    for (i = 1; i <= n; i++)
+-      {
+-        POINT3D p;
+-        infile >> p.x >> p.y >> p.z;
+-        points.Append (p);
+-      }
+-  }
+-  
+-  
+-
+-  void ReadFileMesh (const Mesh & mesh)
+-  {
+-    int i, n;
+-  
+-    n = mesh.GetNSE();   // number of surface elements
+-    cout << n << " Surface elements" << endl;
+-  
+-    for (i = 1; i <= n; i++)
+-      {
+-        SURFELEMENT sel;
+-        const Element2d & el = mesh.SurfaceElement(i);
+-        sel.snr = el.GetIndex();
+-        sel.p1 = el.PNum(1);
+-        sel.p2 = el.PNum(2);
+-        sel.p3 = el.PNum(3);
+-        surfelements.Append (sel);
+-      }
+-    
+-    n = mesh.GetNE();   // number of volume elements
+-    cout << n << " Volume elements" << endl;
+-  
+-    for (i = 1; i <= n; i++)
+-      {
+-        VOLELEMENT el;
+-        const Element & nel = mesh.VolumeElement(i);
+-        el.p1 = nel.PNum(1);
+-        el.p2 = nel.PNum(2);
+-        el.p3 = nel.PNum(3);
+-        el.p4 = nel.PNum(4);
+-        //      infile >> el.p1 >> el.p2 >> el.p3 >> el.p4;
+-        volelements.Append (el);
+-      }
+-    
+-    n = mesh.GetNP();   // number of points 
+-    cout << n << " Points" << endl;
+-  
+-    for (i = 1; i <= n; i++)
+-      {
+-        POINT3D p;
+-        Point3d mp = mesh.Point(i);
+-        p.x = mp.X();
+-        p.y = mp.Y();
+-        p.z = mp.Z();
+-        //      infile >> p.x >> p.y >> p.z;
+-        points.Append (p);
+-      }
+-  }
+-  
+-
+-
+-
+-  void Convert ()
+-  {
+-    int i, j, facei, edgei;
+-    INDEX_3 i3;
+-    INDEX_2 i2;
+-
+-    INDEX_3_HASHTABLE<int> faceindex(volelements.Size()/5 + 1);
+-    INDEX_2_HASHTABLE<int> edgeindex(volelements.Size()/5 + 1);
+-  
+-    for (i = 1; i <= volelements.Size(); i++)
+-      {
+-        for (j = 1; j <= 4; j++)
+-          {
+-            switch (j)
+-              {
+-              case 1:
+-                i3.I1() = volelements.Get(i).p2;
+-                i3.I2() = volelements.Get(i).p3;
+-                i3.I3() = volelements.Get(i).p4;
+-                break;
+-              case 2:
+-                i3.I1() = volelements.Get(i).p1;
+-                i3.I2() = volelements.Get(i).p3;
+-                i3.I3() = volelements.Get(i).p4;
+-                break;
+-              case 3:
+-                i3.I1() = volelements.Get(i).p1;
+-                i3.I2() = volelements.Get(i).p2;
+-                i3.I3() = volelements.Get(i).p4;
+-                break;
+-              case 4:
+-                i3.I1() = volelements.Get(i).p1;
+-                i3.I2() = volelements.Get(i).p2;
+-                i3.I3() = volelements.Get(i).p3;
+-                break;
+-              default:
+-                i3.I1()=i3.I2()=i3.I3()=0;
+-              }
+-            i3.Sort();
+-            if (faceindex.Used (i3)) 
+-              facei = faceindex.Get(i3);
+-            else
+-              {
+-                FACE fa;
+-                fa.p1 = i3.I1();
+-                fa.p2 = i3.I2();
+-                fa.p3 = i3.I3();
+-                facei = faces.Append (fa);
+-                faceindex.Set (i3, facei);
+-              } 
+-        
+-            volelements.Elem(i).faces[j-1] = facei;  
+-          }    
+-    
+-      } 
+- 
+-
+-    for (i = 1; i <= faces.Size(); i++)
+-      {
+-        for (j = 1; j <= 3; j++)
+-          {
+-            switch (j)
+-              {
+-              case 1:
+-                i2.I1() = faces.Get(i).p2;
+-                i2.I2() = faces.Get(i).p3;
+-                break;
+-              case 2:
+-                i2.I1() = faces.Get(i).p1;
+-                i2.I2() = faces.Get(i).p3;
+-                break;
+-              case 3:
+-                i2.I1() = faces.Get(i).p1;
+-                i2.I2() = faces.Get(i).p2;
+-                break;
+-              default:
+-                i2.I1()=i2.I2()=0;
+-              }
+-            if (i2.I1() > i2.I2()) swap (i2.I1(), i2.I2());
+-            if (edgeindex.Used (i2)) 
+-              edgei = edgeindex.Get(i2);
+-            else
+-              {
+-                EDGE ed;
+-                ed.p1 = i2.I1();
+-                ed.p2 = i2.I2();
+-                edgei = edges.Append (ed);
+-                edgeindex.Set (i2, edgei);
+-              } 
+-        
+-            faces.Elem(i).edges[j-1] = edgei;  
+-          }    
+-    
+-      }  
+- 
+-  }  
+-  
+-  
+-  void WriteFile (ostream & outfile)
+-  {
+-    int i;
+-  
+-    outfile 
+-      << "#VERSION: 1.0" << endl
+-      << "#PROGRAM: NETGEN" << endl
+-      << "#EQN_TYPE: POISSON" << endl
+-      << "#DIMENSION: 3D" << endl
+-      << "#DEG_OF_FREE: 1" << endl
+-      << "#DESCRIPTION: I don't know" << endl
+-      << "##RENUM: not done" << endl
+-      << "#USER: Kleinzen" << endl
+-      << "DATE: 10.06.1996" << endl;
+-  
+-    outfile << "#HEADER:   8" << endl
+-            << points.Size() << "  " << edges.Size() << "  " 
+-            << faces.Size() << "  " << volelements.Size() << "  0  0  0  0" << endl;
+-  
+-    outfile << "#VERTEX:   " << points.Size() << endl;
+-    for (i = 1; i <= points.Size(); i++)
+-      outfile << "  " << i << "  " << points.Get(i).x << "  " << points.Get(i).y 
+-              << "  " << points.Get(i).z << endl;
+-    	
+-    outfile << "#EDGE:  " << edges.Size() << endl;
+-    for (i = 1; i <= edges.Size(); i++)
+-      outfile << "  " << i << "  1  " 
+-              << edges.Get(i).p1 << "  " 
+-              << edges.Get(i).p2 
+-              << "  0" << endl;
+-    
+-    outfile << "#FACE:  " << faces.Size() << endl;  
+-    for (i = 1; i <= faces.Size(); i++)
+-      outfile << "  " << i << "  1  3  " 
+-              << faces.Get(i).edges[0] << "  " 
+-              << faces.Get(i).edges[1] << "  " 
+-              << faces.Get(i).edges[2] << endl;
+-    	
+-    outfile << "#SOLID:  " << volelements.Size() << endl;
+-    for (i = 1; i <= volelements.Size(); i++)
+-      outfile << "  " << i << "  1  4  " 
+-              << volelements.Get(i).faces[0] << "  "
+-              << volelements.Get(i).faces[1] << "  "
+-              << volelements.Get(i).faces[2] << "  "
+-              << volelements.Get(i).faces[3] << endl;
+-    	
+-    outfile << "#END_OF_DATA" << endl;
+-  }
+-    
+-
+-  void WriteUserChemnitz (const Mesh & mesh,
+-                          const string & filename)
+-  {
+-    ofstream outfile (filename.c_str());
+-
+-    ReadFileMesh (mesh);
+-    Convert ();
+-  
+-    WriteFile (outfile);
+-    cout << "Wrote Chemnitz standard file" << endl;
+-  }
+-}

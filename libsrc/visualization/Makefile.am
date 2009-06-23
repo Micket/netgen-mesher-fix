@@ -1,0 +1,10 @@
+noinst_HEADERS = meshdoc.hpp mvdraw.hpp vispar.hpp visual.hpp vssolution.hpp
+
+include_HEADERS = soldata.hpp
+
+AM_CPPFLAGS =  $(MPI_INCLUDES) -I$(top_srcdir)/libsrc/include $(OCC_INCLUDES) $(TOGL_INCLUDES) $(TCL_INCLUDES)
+METASOURCES = AUTO
+noinst_LIBRARIES = libvisual.a
+libvisual_a_SOURCES = meshdoc.cpp mvdraw.cpp stlmeshing.cpp vscsg.cpp \
+	vsfieldlines.cpp vsmesh.cpp vsocc.cpp vssolution.cpp importsolution.cpp
+AM_CXXFLAGS =

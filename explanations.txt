@@ -1,0 +1,20 @@
+------------------- Core math ---------------------------
+
+gprim   - Basic types and functions for vector math
+linalg  - Basic types for linear algebra
+general - Convenience functions. strings, sorting, memory allocation, hashtables, and more
+
+------------------- Core meshing ------------------------
+These libraries have cross dependencies. Unless componenets are carefully picked out of each module
+they all have to be included in any library.
+
+csg     - Computational surface geometry. Depends on linalg, meshing, geom2d
+meshing - Creates meshes. Depends on csg, linalg, stlgeom
+geom2d  - 2D functions. Depends on csg, linalg, meshing
+stlgeom - STL functions. Depends on meshing, gprim, linalg, 
+
+------------------- Optional ------------------------
+
+interface     - Read/Write support for various file formats. Depends on occ
+occ           - OpenCascade support
+visualization - For visualization of the mesh

@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<history>
+   <processor signature="gcc noversion nomachine -c -fPIC -Ilibsrc/include">
+      <target file="polyhedra.o" lastModified="121c5acc230">
+         <source file="libsrc/csg/polyhedra.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="curve2d.o" lastModified="121c5acbe48">
+         <source file="libsrc/csg/curve2d.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="solid.o" lastModified="121c5ace170">
+         <source file="libsrc/csg/solid.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="manifold.o" lastModified="121c5acd1d0">
+         <source file="libsrc/csg/manifold.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="spline3d.o" lastModified="121c5acd5b8">
+         <source file="libsrc/csg/spline3d.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="surface.o" lastModified="121c5acca00">
+         <source file="libsrc/csg/surface.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="explicitcurve2d.o" lastModified="121c5acd1d0">
+         <source file="libsrc/csg/explicitcurve2d.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="brick.o" lastModified="121c5ace940">
+         <source file="libsrc/csg/brick.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="csgparser.o" lastModified="121c5accde8">
+         <source file="libsrc/csg/csgparser.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="algprim.o" lastModified="121c5acc618">
+         <source file="libsrc/csg/algprim.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="revolution.o" lastModified="121c5aced28">
+         <source file="libsrc/csg/revolution.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="edgeflw.o" lastModified="121c5acc230">
+         <source file="libsrc/csg/edgeflw.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="identify.o" lastModified="121c5acd9a0">
+         <source file="libsrc/csg/identify.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="triapprox.o" lastModified="121c5ace170">
+         <source file="libsrc/csg/triapprox.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="meshsurf.o" lastModified="121c5acdd88">
+         <source file="libsrc/csg/meshsurf.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="specpoin.o" lastModified="121c5aced28">
+         <source file="libsrc/csg/specpoin.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="csgeom.o" lastModified="121c5ace558">
+         <source file="libsrc/csg/csgeom.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="gencyl.o" lastModified="121c5acba60">
+         <source file="libsrc/csg/gencyl.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="singularref.o" lastModified="121c5acba60">
+         <source file="libsrc/csg/singularref.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="extrusion.o" lastModified="121c5acd5b8">
+         <source file="libsrc/csg/extrusion.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="bspline2d.o" lastModified="121c5acca00">
+         <source file="libsrc/csg/bspline2d.cpp" lastModified="121a0766048"/>
+      </target>
+      <target file="genmesh.o" lastModified="121c5acdd88">
+         <source file="libsrc/csg/genmesh.cpp" lastModified="121a0766048"/>
+      </target>
+   </processor>
+   <processor signature="gcc -shared">
+      <target file="libnetgen_csg.so" lastModified="121c5ad9908">
+         <source file="build/obj/libsrc/csg/gencyl.o" lastModified="121c5a9c490"/>
+         <source file="build/obj/libsrc/csg/singularref.o" lastModified="121c5a9c878"/>
+         <source file="build/obj/libsrc/csg/curve2d.o" lastModified="121c5a9c878"/>
+         <source file="build/obj/libsrc/csg/polyhedra.o" lastModified="121c5a9cc60"/>
+         <source file="build/obj/libsrc/csg/edgeflw.o" lastModified="121c5a9d048"/>
+         <source file="build/obj/libsrc/csg/algprim.o" lastModified="121c5a9d048"/>
+         <source file="build/obj/libsrc/csg/bspline2d.o" lastModified="121c5a9d430"/>
+         <source file="build/obj/libsrc/csg/surface.o" lastModified="121c5a9d818"/>
+         <source file="build/obj/libsrc/csg/csgparser.o" lastModified="121c5a9d818"/>
+         <source file="build/obj/libsrc/csg/explicitcurve2d.o" lastModified="121c5a9dc00"/>
+         <source file="build/obj/libsrc/csg/manifold.o" lastModified="121c5a9dc00"/>
+         <source file="build/obj/libsrc/csg/spline3d.o" lastModified="121c5a9dfe8"/>
+         <source file="build/obj/libsrc/csg/extrusion.o" lastModified="121c5a9e3d0"/>
+         <source file="build/obj/libsrc/csg/identify.o" lastModified="121c5a9e3d0"/>
+         <source file="build/obj/libsrc/csg/meshsurf.o" lastModified="121c5a9e7b8"/>
+         <source file="build/obj/libsrc/csg/genmesh.o" lastModified="121c5a9e7b8"/>
+         <source file="build/obj/libsrc/csg/solid.o" lastModified="121c5a9eba0"/>
+         <source file="build/obj/libsrc/csg/triapprox.o" lastModified="121c5a9ef88"/>
+         <source file="build/obj/libsrc/csg/csgeom.o" lastModified="121c5a9ef88"/>
+         <source file="build/obj/libsrc/csg/brick.o" lastModified="121c5a9f370"/>
+         <source file="build/obj/libsrc/csg/specpoin.o" lastModified="121c5a9f758"/>
+         <source file="build/obj/libsrc/csg/revolution.o" lastModified="121c5a9fb40"/>
+      </target>
+   </processor>
+</history>

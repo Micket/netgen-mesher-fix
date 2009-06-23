@@ -1,0 +1,248 @@
+<?xml version="1.0"?>
+<project name="netgen" default="gui" basedir="." xmlns:cpptasks="antlib:net.sf.antcontrib.cpptasks">
+<description>
+ Usage:
+ ant -lib cpptasks.jar [-f PROPERTYFILE] [-Doption=value ...] TARGET
+</description>
+
+<!-- Some long parameters -->
+<property name="occlibs" value="TKernel, TKGeomBase, TKMath, TKG2d, TKG3d, TKXSBase, TKOffset, TKFillet, TKShHealing, TKMesh, TKMeshVS, TKTopAlgo, TKGeomAlgo, TKBool, TKPrim, TKBO, TKIGES, TKBRep, TKSTEPBase, TKSTEP, TKSTL, TKSTEPAttr, TKSTEP209, TKXDESTEP, TKXDEIGES, TKXCAF, TKDCAF, TKLCAF"/>
+<property name="files.csg" value="*.cpp"/>
+<property name="files.general" value="array.cpp, bitarray.cpp, dynamicmem.cpp, flags.cpp, hashtabl.cpp, moveablemem.cpp, mystring.cpp, ngexception.cpp, optmem.cpp, parthreads.cpp, profiler.cpp, seti.cpp, sort.cpp, spbita2d.cpp, symbolta.cpp, table.cpp"/>
+<property name="files.geom2d" value="*.cpp"/>
+<property name="files.gprim" value="*.cpp"/>
+<property name="files.interface" value="*.cpp"/>
+<property name="files.linalg" value="*.cpp"/>
+<property name="files.meshing" value="adfront2.cpp, adfront3.cpp, bisect.cpp, boundarylayer.cpp, clusters.cpp, curvedelems.cpp, delaunay.cpp, geomsearch.cpp, global.cpp, hprefinement.cpp, improve2.cpp, improve2gen.cpp, improve3.cpp, localh.cpp, meshclass.cpp, meshfunc.cpp, meshfunc2d.cpp, meshing2.cpp, meshing3.cpp, meshtool.cpp, meshtype.cpp, msghandler.cpp, netrule2.cpp, netrule3.cpp, parser2.cpp, parser3.cpp, prism2rls.cpp, pyramid2rls.cpp, pyramidrls.cpp, quadrls.cpp, refine.cpp, ruler2.cpp, ruler3.cpp, secondorder.cpp, smoothing2.5.cpp, smoothing2.cpp, smoothing3.cpp, specials.cpp, tetrarls.cpp, topology.cpp, triarls.cpp, validate.cpp, zrefine.cpp, parallelmesh.cpp, paralleltop.cpp"/>
+<property name="files.occ" value="*.cpp, *.cxx"/>
+<property name="files.stlgeom" value="*.cpp"/>
+<property name="files.visualization" value="*.cpp"/>
+<property name="files.gui" value="*.cpp"/>
+
+<!-- Default properties -->
+<property name="version" value="4.9.10-dev"/>
+<property name="debug" value="true"/>
+<property name="compiler" value="gcc"/>
+<property name="linker" value="gcc"/>
+<property name="build.dir" location="build"/>
+<property name="obj.dir" location="${build.dir}/obj"/>
+<property name="optimization" value="speed"/>
+<property name="compilerarg" value="-O2 -Wall"/>
+<property name="linktype" value="shared"/>
+<property name="threads" value="4"/>
+<property name="install.dir" location="/opt/netgen"/>
+
+<property name="parallel" value="false"/>
+<property name="mpi.inc" location="/usr/lib/mpich/include"/>
+<property name="mpi.lib" location="/usr/lib/mpich/lib/shared"/>
+<property name="metis.inc" location="/usr/include/metis"/>
+<property name="metis.lib" location=""/>
+
+<property name="occ" value="true"/>
+<property name="occ.inc" location="/usr/include/opencascade"/>
+<property name="occ.lib" location="/usr/lib/opencas"/>
+
+<property name="gui.jpeg" value="true"/>
+<property name="gui.ffmpeg" value="false"/>
+<property name="gui.opengl" value="true"/>
+<property name="gui.togl.inc" location="/opt/Togl-1.7"/>
+<property name="gui.togl.lib" location="/opt/Togl-1.7"/>
+<property name="gui.togl.ws" value="TOGL_X11"/>
+<property name="gui.tcl.inc" location="/usr/include/tcl"/>
+
+<!-- Platform specific properties -->
+<property file="${os.name}.properties"/>
+
+<target name="init">
+	<mkdir dir="${build.dir}"/>
+	<mkdir dir="${obj.dir}"/>
+    <condition property="is-occ"><equals arg1="${occ}" arg2="true"/></condition>
+    <condition property="is-parallel"><equals arg1="${parallel}" arg2="true"/></condition>
+    <condition property="is-gui.opengl"><equals arg1="${gui.opengl}" arg2="true"/></condition>
+    <condition property="is-gui.ffmpeg"><equals arg1="${gui.ffmpeg}" arg2="true"/></condition>
+    <condition property="is-gui.jpeg"><equals arg1="${gui.jpeg}" arg2="true"/></condition>
+</target>
+
+<target name="clean" description="Clean up">
+	<delete dir="${build.dir}"/>
+	<delete dir="${obj.dir}"/>
+</target>
+
+<!-- Just basic install support -->
+<target name="install" depends="gui" description="Installs netgen">
+    <mkdir dir="${install.dir}"/>
+    <copy todir="${install.dir}">
+        <fileset dir="${build.dir}" includes="*netgen_*,netgen"/>
+        <fileset dir="${basedir}/ng" includes="*.tcl"/>
+    </copy>
+</target>
+
+<!-- This isn't finished. I need to sort out the headers and the manual -->
+<target name="dist" depends="gui" description="Prepares for packaging Debian style">
+    <mkdir dir="${basedir}/dist/share/man/man1/"/><!-- Need to write a man page. Steal from debian? -->
+    <mkdir dir="${basedir}/dist/share/netgen/ngtcltk/"/>
+    <mkdir dir="${basedir}/dist/share/netgen/demoapp/"/>
+    <mkdir dir="${basedir}/dist/share/netgen/tutorial/"/>
+    <mkdir dir="${basedir}/dist/include/netgen/"/>
+    <mkdir dir="${basedir}/dist/lib/"/>
+    <mkdir dir="${basedir}/dist/bin/"/>
+
+    <copy todir="${basedir}/dist/bin/" file="${basedir}/build/netgen"/>
+    <!--<gzip src="${basedir}/doc/netgen.1" destfile="${basedir}/share/man/man1/netgen.1.gz"/>-->
+    <copy todir="${basedir}/dist/share/netgen/ngtcltk">
+        <fileset dir="${basedir}/ng" includes="*.tcl"/>
+    </copy>
+    <copy todir="${basedir}/dist/share/netgen/demoapp">
+        <fileset dir="${basedir}/ng" includes="demoview.cpp,demoview.hpp"/>
+    </copy>
+    <!-- Strip these? -->
+    <copy todir="${basedir}/dist/lib">
+        <fileset dir="${basedir}/build/" includes="*netgen_*"/>
+    </copy>
+    <copy todir="${basedir}/dist/share/netgen/demoapp">
+        <fileset dir="${basedir}/ng" includes="demoview.cpp,demoview.hpp"/>
+    </copy>
+    <!-- TODO: Which headers should one use? Subfolders? -->
+    <copy todir="${basedir}/dist/include/netgen">
+        <fileset dir="${basedir}/libsrc/csg" includes="*.hpp"/>
+        <fileset dir="${basedir}/libsrc/general" includes="*.hpp"/>
+        <fileset dir="${basedir}/libsrc/geom2d" includes="*.hpp"/>
+        <fileset dir="${basedir}/libsrc/gprim" includes="*.hpp"/>
+        <fileset dir="${basedir}/libsrc/include" includes="*.hpp"/>
+        <fileset dir="${basedir}/libsrc/interface" includes="interface.hpp"/>
+        <fileset dir="${basedir}/libsrc/linalg" includes="*.hpp"/>
+        <fileset dir="${basedir}/libsrc/meshing" includes="*.hpp"/>
+        <fileset dir="${basedir}/libsrc/occ" includes="*.hpp"/>
+        <fileset dir="${basedir}/libsrc/stlgeom" includes="*.hpp"/>
+        <fileset dir="${basedir}/libsrc/visualization" includes="*.hpp"/>
+    </copy>
+</target>
+
+<target name="print-setup">
+    <echo message="Operating system: ... ${os.name}"/>
+    <echo message="Setup:"/>
+    <echo message="Parallel: ........... ${parallel} (experimental, leave it off)"/>
+    <echo message="OCC: ................ ${occ}"/>
+    <echo message="JPEG: ............... ${gui.jpeg}"/>
+    <echo message="FFMPEG: ............. ${gui.ffmpeg}"/>
+    <echo message="OpenGL: ............. ${gui.opengl}"/>
+    <echo message="Paths:"/>
+    <echo message="TOGL: ............... ${gui.togl.inc}, ${gui.togl.lib}"/>
+    <echo message="MPI: ................ ${mpi.inc}, ${mpi.lib}"/>
+    <echo message="METIS: .............. ${metis.inc}, ${metis.lib}"/>
+    <echo message="OCC: ................ ${occ.inc}, ${occ.lib}"/>
+</target>
+
+<target name="gui" depends="core,interface,occ,visualization" description="The netgen GUI">
+    <mkdir dir="${obj.dir}/ng"/>
+    <cpptasks:cc 
+        outtype="executable" 
+        subsystem="gui" 
+        outfile="${build.dir}/netgen" 
+        objdir="${obj.dir}/ng"
+        threads="${threads}"
+        optimize="${optimization}"
+        multithreaded="true"
+        debug="${debug}">
+        <compilerarg value="${compilerarg}"/>
+        <defineset if="is-occ"        define="OCCGEOMETRY"/>
+        <defineset if="is-gui.opengl" define="OPENGL"/>
+        <defineset if="is-gui.jpeg"   define="JPEGLIB"/>
+        <defineset if="is-gui.ffmpeg" define="FFMPEG"/>
+        <defineset><define name="PACKAGE_VERSION" value='"${version}"'/></defineset>
+        <includepath path="${basedir}/libsrc/include"/>
+        <includepath path="${basedir}/libsrc/interface"/>
+        <sysincludepath path="${gui.tcl.inc}"/>
+        <sysincludepath if="is-gui.opengl" path="${gui.togl.inc}"/>
+        <sysincludepath if="is-gui.ffmpeg" path="${gui.ffmpeg.inc}"/>
+        <sysincludepath if="is-occ"        path="${occ.inc}"/>
+        <libset type="${linktype}" dir="${build.dir}" libs="netgen_core,netgen_interface"/>
+        <libset type="${linktype}" if="is-occ" dir="${build.dir}" libs="netgen_occ"/>
+        <libset type="${linktype}" dir="${build.dir}" libs="netgen_visualization"/>
+        <syslibset type="shared" if="is-occ"      dir="${occ.lib}" libs="${occlibs}"/> 
+        <syslibset type="shared" if="is-parallel" dir="${mpi.lib}" libs="mpi"/>
+        <syslibset type="shared" if="is-parallel" dir="${metis.lib}" libs="metis"/>
+        <syslibset type="shared" if="is-gui.jpeg" libs="jpeg"/>
+        <syslibset type="shared" if="is-gui.ffmpeg" libs="avutil, avformat, avcodec, swscale, z, bz2"/> 
+        <syslibset type="shared" if="is-gui.opengl" dir="${gui.togl.lib}" libs="Togl1.7,GLU,GL"/>
+        <syslibset type="shared" libs="tcl,tk,Xmu"/>
+        <fileset dir="${basedir}/ng/" includes="${files.gui}"/>
+        <compiler name="${compiler}"/>
+        <linker name="${linker}"/>
+    </cpptasks:cc>
+    <!--<if name="strip" value="true"><cpptasks:strip></cpptasks:strip></if>-->
+</target>
+
+<!-- Helper macro for compiling the different modules -->
+<macrodef name="compile-module">
+    <attribute name="module" default="NOT SET"/>
+    <element name="cc-elements" optional="yes"/>
+    <sequential>
+        <mkdir dir="${obj.dir}/libsrc/@{module}"/>
+        <!-- optimize="${optimization}" <- Not good enough, only O1 -->
+        <cpptasks:cc 
+            name="${compiler}"
+            objdir="${obj.dir}/libsrc/@{module}"
+            outfile="${build.dir}/netgen_@{module}"
+            outtype="${linktype}"
+            threads="${threads}"
+            debug="${debug}">
+            <linker name="${linker}"/>
+            <compilerarg value="${compilerarg}"/>
+            <includepath path="${basedir}/libsrc/"/>
+            <includepath path="${basedir}/libsrc/include"/>
+            <cc-elements/>
+        </cpptasks:cc>
+    </sequential>
+</macrodef>
+
+<target name="core" depends="init" description="Meshing functionality">
+    <compile-module module="core">
+        <cc-elements>
+            <fileset dir="${basedir}/libsrc/csg"     includes="${files.csg}"/>
+            <fileset dir="${basedir}/libsrc/meshing" includes="${files.meshing}"/>
+            <fileset dir="${basedir}/libsrc/geom2d"  includes="${files.geom2d}"/>
+            <fileset dir="${basedir}/libsrc/stlgeom" includes="${files.stlgeom}"/>
+            <!-- Could these 3 be made into a seperate library? Maybe not necessary -->
+            <fileset dir="${basedir}/libsrc/gprim"   includes="${files.gprim}"/>
+            <fileset dir="${basedir}/libsrc/linalg"  includes="${files.linalg}"/>
+            <fileset dir="${basedir}/libsrc/general" includes="${files.general}"/>
+        </cc-elements>
+    </compile-module>
+</target>
+
+<!-- Optional modules -->
+<target name="occ" depends="init,core" description="OpenCascade module">
+    <compile-module module="occ">
+        <cc-elements>
+            <includepath path="${basedir}/libsrc/occ"/>
+            <sysincludepath path="${occ.inc}"/>
+            <defineset if="is-occ" define="OCCGEOMETRY"/>
+            <fileset dir="${basedir}/libsrc/occ" includes="${files.occ}"/>
+        </cc-elements>
+    </compile-module>
+</target>
+
+<target name="interface" depends="init,core" description="Read and write interface to other formats">
+    <compile-module module="interface">
+        <cc-elements>
+            <fileset dir="${basedir}/libsrc/interface" includes="${files.interface}"/>
+        </cc-elements>
+    </compile-module>
+</target>
+
+<target name="visualization" depends="init,occ,core" description="Visualization module">
+    <compile-module module="visualization">
+        <cc-elements>
+            <defineset if="is-gui.opengl" define="OPENGL, ${gui.togl.ws}"/>
+            <defineset if="is-occ"        define="OCCGEOMETRY"/>
+            <sysincludepath if="is-occ" path="${occ.inc}"/>
+            <defineset><define name="PACKAGE_VERSION" value='"${version}"'/></defineset>
+            <syslibset type="shared" if="is-gui.opengl" dir="${gui.togl.lib}" libs="Togl1.7"/>
+            <sysincludepath path="${gui.tcl.inc}"/>
+            <fileset dir="${basedir}/libsrc/visualization" includes="${files.visualization}"/>
+        </cc-elements>
+    </compile-module>
+</target>
+
+</project>
